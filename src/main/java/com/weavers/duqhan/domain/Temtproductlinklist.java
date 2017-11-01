@@ -46,7 +46,7 @@ public class Temtproductlinklist extends BaseDomain {
 		this.error = error;
 	}
 
-    public String getLink() {
+	public String getLink() {
         return link;
     }
 

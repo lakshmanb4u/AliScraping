@@ -5,6 +5,8 @@
  */
 package com.weavers.duqhan.domain;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,6 +35,18 @@ public class ProductListLink extends BaseDomain {
     @NotNull
     @Column(name = "status")
     private int status;
+    @Column(name = "started_at")
+	private Date startedAt;
+    @Column(name = "ended_at")
+	private Date endedAt;
+
+    public Date getEndedAt() {
+		return endedAt;
+	}
+
+	public void setEndedAt(Date endedAt) {
+		this.endedAt = endedAt;
+	}
 
     public String getLink() {
         return link;
@@ -49,5 +63,13 @@ public class ProductListLink extends BaseDomain {
     public void setStatus(int status) {
         this.status = status;
     }
+
+	public void setStartedAt(Date startedAt) {
+		this.startedAt = startedAt;
+	}
+	
+	public Date getStartedAt() {
+		return this.startedAt;
+	}
 
 }

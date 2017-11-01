@@ -2,6 +2,7 @@ package com.weavers.duqhan;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -71,6 +72,7 @@ public class ScheduledTasks {
 		ProductListLink productListLink = lists.get(0);
 		String url = productListLink.getLink();///*"https://www.google.com";*/ "https://www.aliexpress.com/category/200188001/fine-jewelry.html";
 		productListLink.setStatus(-1);
+		productListLink.setStartedAt(new Date());
 		productListLinkDao.save(productListLink);
 		try {
 			Document doc = connect(url);
@@ -87,6 +89,7 @@ public class ScheduledTasks {
 				System.out.println("Something went wrong");
 			}
 			productListLink.setStatus(1);
+			productListLink.setEndedAt(new Date());
 			productListLinkDao.save(productListLink);
 		} catch(Exception e) {
 			e.printStackTrace();
