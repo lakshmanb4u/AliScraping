@@ -37,6 +37,8 @@ public class Temtproductlinklist extends BaseDomain {
     @Column(name = "error")
     @Lob
     private String error;
+    @Column(name = "parent_url")
+	private Long parentUrl;
 
     public String getError() {
 		return error;
@@ -61,5 +63,13 @@ public class Temtproductlinklist extends BaseDomain {
     public void setStatus(int status) {
         this.status = status;
     }
+    
+    public Long getParentUrl() {
+		return this.parentUrl;
+	}
+
+	public void setParentUrl(Long id) {
+		this.parentUrl = id;
+	}
 
 }

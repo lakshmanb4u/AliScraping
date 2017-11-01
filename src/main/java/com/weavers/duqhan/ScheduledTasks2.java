@@ -58,27 +58,7 @@ import com.weavers.duqhan.util.CurrencyConverter;
 public class ScheduledTasks2 {
 	
 	
-	private static final String[] proxies = {
-			/*"mamidilaxmanlnu:EHnMqzod@173.246.165.22:60099",
-			"mamidilaxmanlnu:EHnMqzod@173.246.167.254:60099",*/
-			//"pxu1039-0:ySza*EciKXT$U$G713uu@x.botproxy.net:8080",	
-			//"Lakshmanb4u:Duqhan01@world.proxymesh.com:31280",		
-			"Lakshmanb4u:Duqhan01@us-wa.proxymesh.com:31280",
-			};
-			
-	private static final String[] servers = {
-			"server-1",
-			"server-2"};
 	
-	public static String getRandomProxy() {
-	    int rnd = new Random().nextInt(proxies.length);
-	    return proxies[rnd];
-	}
-	
-	public static String getRandomServer() {
-	    int rnd = new Random().nextInt(proxies.length);
-	    return servers[rnd];
-	}
 	
 	
 	@Autowired
@@ -99,12 +79,12 @@ public class ScheduledTasks2 {
     ProductPropertiesMapDao productPropertiesMapDao;
 
    
-    @Scheduled(fixedRate = 60*1000*30)
+    @Scheduled(fixedRate = 30*1000)
     public void loadTempProducts() {
     	
         boolean isSuccess = true;
         String startDate = new Date().toString();
-        Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.INFO, "Starting  Scheduler");
+        Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Starting  Scheduler 2");
         try {
             String status = "";
             int i = 0;
@@ -115,6 +95,7 @@ public class ScheduledTasks2 {
                 if(temtproductlinklist == null) break;
                 //Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
                 if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
+                	 Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Starting  Scheduler 2" + temtproductlinklist.getLink() );
                     Product testProduct = productDao.getProductByExternelLink(temtproductlinklist.getLink());
                     if (testProduct == null) {
                     	temtproductlinklist.setStatus(5);
@@ -131,7 +112,7 @@ public class ScheduledTasks2 {
                             testProduct = new Product();
                             Product savedTestProduct;
                
-                            Document doc = connect(url);
+                            Document doc = Utility.connect(url);
                             detailMain = doc.select("#j-detail-page");
                             if (!detailMain.isEmpty()) {
 
@@ -303,7 +284,7 @@ public class ScheduledTasks2 {
                                         String cssurl = element.attr("abs:href");
                                         if (cssurl.contains("??main-detail")) {
                                             try {
-                                                cssdoc = connect(cssurl);
+                                                cssdoc = Utility.connect(cssurl);
                                             } catch (IOException ex) {
 
                                             }
@@ -472,58 +453,15 @@ public class ScheduledTasks2 {
         } catch (Exception e) {
             isSuccess = false;
             String body = "(==E==)DATE: " + new Date().toString() + "Store product details in temp product table get error.....<br/> Started on" + startDate + "<br/>";
-            Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.SEVERE, body, e);
+            Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.SEVERE, body, e);
         }
         if (isSuccess) {
-        	Logger.getLogger(ProductServiceImpl.class.getName()).log(Level.INFO, "Stopping At  Scheduler");
+        	Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Stopping At  Scheduler");
             
            
         }
     }
-
-
-
 	
-	
-	
-	
-	
-	public static Document connect(String url) throws HttpException, IOException, InterruptedException {
-		
-		String proxyToken[] = getRandomProxy().split("@");
-		String proxyCredentials[] = proxyToken[0].split(":");
-		String proxyHost[] = proxyToken[1].split(":");
-		
-		HttpHost targetHost = new HttpHost(proxyHost[0], Integer.parseInt(proxyHost[1]));
-		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		credsProvider.setCredentials(
-		        new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-		        new UsernamePasswordCredentials(proxyCredentials[0], proxyCredentials[1]));
-		HttpClientContext context = HttpClientContext.create();
-		context.setCredentialsProvider(credsProvider);
-		
-		HttpGet  method = new HttpGet (url);
-		CloseableHttpClient httpclient = HttpClientBuilder.
-				create().
-				setProxy(targetHost).
-				setDefaultCredentialsProvider(credsProvider).
-				build();
-		CloseableHttpResponse response = httpclient.execute(
-	             method);
-		int code = response.getStatusLine().getStatusCode();
-		
-		try {
-		if(code == 200) {
-			return  Jsoup.parse(response.getEntity().getContent(),"ISO-8859-9", "");
-		} else {
-			System.out.println(response.getStatusLine().getReasonPhrase());
-			System.out.println(response.getStatusLine().getStatusCode());
-		}
-		return null;
-		} finally {
-			method.releaseConnection();
-		}
-	}
 	
 	@Async
 	private  void saveLinksToDB(List<ProductDetailsLinks> productDetailsLinks, String urlOfListPage) {

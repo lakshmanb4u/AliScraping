@@ -39,9 +39,10 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
     	
     	Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status =" + 0 +" ORDER BY RAND()");
     	query.setMaxResults(1);
-    	try {
-    		return (Temtproductlinklist)query.getSingleResult();
-    	} catch (org.springframework.dao.EmptyResultDataAccessException ex) {
+    	List<Temtproductlinklist> list = query.getResultList();
+    	if(!list.isEmpty()) {
+    		return (Temtproductlinklist)list.get(0);
+    	} else {
     		return null;
     	}
     }

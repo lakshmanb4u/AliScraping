@@ -4,20 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -41,30 +31,11 @@ public class ScheduledTasks {
 	@Autowired
 	ProductListLinkDaoJpa productListLinkDao;
 	
-	private static final String[] proxies = {
-			/*"mamidilaxmanlnu:EHnMqzod@173.246.165.22:60099",
-			"mamidilaxmanlnu:EHnMqzod@173.246.167.254:60099",*/
-			//"pxu1039-0:ySza*EciKXT$U$G713uu@x.botproxy.net:8080",	
-			"Lakshmanb4u:Duqhan01@world.proxymesh.com:31280",		
-			//"Lakshmanb4u:Duqhan01@sg.proxymesh.com:31280",
-			};
-			
-	private static final String[] servers = {
-			"server-1",
-			"server-2"};
 	
-	public static String getRandomProxy() {
-	    int rnd = new Random().nextInt(proxies.length);
-	    return proxies[rnd];
-	}
-	
-	public static String getRandomServer() {
-	    int rnd = new Random().nextInt(proxies.length);
-	    return servers[rnd];
-	}
-
-	@Scheduled(fixedRate = 60000)
+	@Scheduled(fixedRate = 60*1000)
 	public void schedule() {
+		Logger.getLogger(ScheduledTasks.class.getName()).log(Level.INFO, "Starting  Scheduler 1");
+        
 		List<ProductListLink> lists = productListLinkDao.getUnprocessedProductListLink();
 		if(lists.isEmpty()) {
 			return;
@@ -75,16 +46,20 @@ public class ScheduledTasks {
 		productListLink.setStartedAt(new Date());
 		productListLinkDao.save(productListLink);
 		try {
-			Document doc = connect(url);
+			Logger.getLogger(ScheduledTasks.class.getName()).log(Level.INFO, "Starting " + url);
+			Document doc = Utility.connect(url);
+			
 			if(doc == null) return;
+			
 			else {
-				System.out.println("found for "+ url);
+				Logger.getLogger(ScheduledTasks.class.getName()).log(Level.INFO, "found for " + url);
+				
 			}
 			
 			Elements productUrlList = doc.select("div.ui-pagination-navi a");
 			
 			if(!productUrlList.isEmpty()) {
-				handlingPagination(productUrlList);
+				handlingPagination(productUrlList,productListLink.getId());
 			} else {
 				System.out.println("Something went wrong");
 			}
@@ -96,44 +71,9 @@ public class ScheduledTasks {
 		}
 	}
 	
-	public static Document connect(String url) throws HttpException, IOException, InterruptedException {
-		
-		String proxyToken[] = getRandomProxy().split("@");
-		String proxyCredentials[] = proxyToken[0].split(":");
-		String proxyHost[] = proxyToken[1].split(":");
-		
-		HttpHost targetHost = new HttpHost(proxyHost[0], Integer.parseInt(proxyHost[1]));
-		CredentialsProvider credsProvider = new BasicCredentialsProvider();
-		credsProvider.setCredentials(
-		        new AuthScope(targetHost.getHostName(), targetHost.getPort()),
-		        new UsernamePasswordCredentials(proxyCredentials[0], proxyCredentials[1]));
-		HttpClientContext context = HttpClientContext.create();
-		context.setCredentialsProvider(credsProvider);
-		
-		HttpGet  method = new HttpGet (url);
-		CloseableHttpClient httpclient = HttpClientBuilder.
-				create().
-				setProxy(targetHost).
-				setDefaultCredentialsProvider(credsProvider).
-				build();
-		CloseableHttpResponse response = httpclient.execute(
-	             method);
-		int code = response.getStatusLine().getStatusCode();
-		
-		try {
-		if(code == 200) {
-			return  Jsoup.parse(response.getEntity().getContent(),"ISO-8859-9", "");
-		} else {
-			System.out.println(response.getStatusLine().getReasonPhrase());
-			System.out.println(response.getStatusLine().getStatusCode());
-		}
-		return null;
-		} finally {
-			method.releaseConnection();
-		}
-	}
 	
-	public void handlingPagination(Elements productUrlList) throws HttpException, IOException, InterruptedException {
+	
+	public void handlingPagination(Elements productUrlList, Long id) throws HttpException, IOException, InterruptedException {
 		int MAX_PAGE = 999;
 		String nexturl = productUrlList.get(0).attr("href");
 		if(!nexturl.startsWith("https")) {
@@ -147,11 +87,14 @@ public class ScheduledTasks {
         	
         	nexturl = firstPart + i + secondPart; 
         	
-            Document doc = connect(nexturl);
+            Document doc = Utility.connect(nexturl);
+            if(doc == null) {
+            	continue;
+            }
             Elements singleProductUrls = doc.select(".son-list .list-item .pic a[href]");
             
             if(!singleProductUrls.isEmpty()) {
-    			handlingSingleProductUrl(singleProductUrls,nexturl);
+    			handlingSingleProductUrl(singleProductUrls,nexturl,id);
     		} else {
     			System.out.println("Might be end of list, but not sure please debug for url ");
     			String titleOfPage = doc.title();
@@ -176,8 +119,8 @@ public class ScheduledTasks {
         }
 	}
 	
-	private  void handlingSingleProductUrl(Elements singleProductUrls,String urlOfListPage) throws HttpException, IOException {
-		System.out.println("Starting" + urlOfListPage);
+	private  void handlingSingleProductUrl(Elements singleProductUrls,String urlOfListPage,Long id) throws HttpException, IOException {
+		//System.out.println("Starting" + urlOfListPage);
 		List<ProductDetailsLinks> productDetailsLinks = new ArrayList<ProductDetailsLinks>();
 		  for (Element element : singleProductUrls) {
 			  String link = element.attr("href");
@@ -187,21 +130,22 @@ public class ScheduledTasks {
 			  ProductDetailsLinks productLink = new ProductDetailsLinks();
 			  productLink.setProductDetailLink(link);
 			  productLink.setStatus('I');
-			  productLink.setResponsibleServer(getRandomServer());
+			  productLink.setResponsibleServer(Utility.getRandomServer());
 			  productDetailsLinks.add(productLink);
 		  }
 		  //System.out.println(String.format("For %s no of products %s", urlOfListPage, productDetailsLinks.size()));
-		  saveLinksToDB(productDetailsLinks,urlOfListPage);
+		  saveLinksToDB(productDetailsLinks,urlOfListPage,id);
 	}
 	
 	@Async
-	private  void saveLinksToDB(List<ProductDetailsLinks> productDetailsLinks, String urlOfListPage) {
-		System.out.println("Saving" + urlOfListPage);
+	private  void saveLinksToDB(List<ProductDetailsLinks> productDetailsLinks, String urlOfListPage,Long id) {
+		
 		for (ProductDetailsLinks link : productDetailsLinks) {
 			Temtproductlinklist temtproductlinklist = temtproductlinklistDao.getTemtproductlinklistByLink(link.getProductDetailLink());
 	        if (temtproductlinklist == null) {
 	            temtproductlinklist = new Temtproductlinklist();
 	            temtproductlinklist.setLink(link.getProductDetailLink());
+	            temtproductlinklist.setParentUrl(id);
 	            temtproductlinklist.setStatus(0);
 	            temtproductlinklistDao.save(temtproductlinklist);
 	        }
