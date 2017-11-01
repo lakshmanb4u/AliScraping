@@ -112,7 +112,7 @@ public class ScheduledTasks2 {
             	
                 status = "Link duplicate";
                 Temtproductlinklist temtproductlinklist = temtproductlinklistDao.getRandomeUnprocessedTempProduct();
-                
+                if(temtproductlinklist == null) break;
                 //Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
                 if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
                     Product testProduct = productDao.getProductByExternelLink(temtproductlinklist.getLink());
