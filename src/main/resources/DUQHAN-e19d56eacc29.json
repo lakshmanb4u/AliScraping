@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tangential-box-171303",
+  "private_key_id": "e19d56eacc29cc47accc1b0bb35bea2e04c16d66",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCn3IuYBpw5bjLf\nfLGdBCTZ746zI2HWfRL/kZTZ53QGmQ3JRXIrqk64bPiAgs6iT7Zy1rE9tEGZntJH\nowTrgLCsLiDKET9m7MHyIg/JIeCMzTZa8XroxgROlZSbJSqvdaaIJW8SxMlI4CjF\n4XBVN5aSmtQkQ1QCtS8yN0ONTAEU2URENo+fnKGwCSk/eDefCs6M0s0sjaiPRJhI\np+gmQP7aW/A1yeUBrOSG/xabWvF+bsYLKlOzSIapRGdfIlmhSwhaYJUMzQElOsO7\nZfDwtgdN1zlIc+G2LMaDGIxk6ivpzfMV1N7Cavvn3+BI2K6piqeAHuPIstznd3zs\nx+oe8oY3AgMBAAECggEAR4J12XLfdLvUYk7Nn3VXeZxLL1dgY65uvH85aUbnr7Pe\nIqM6Cw4HcRvDFYQkIRNSR0Pcx8uVsqrtK+VvwB/Xo9IW195XIzKzQMJv9SBAd9so\nT7/Vu3o39X5Vi25e69Zz9kX0NoussCYGWJ48a6E9vQDGZRhlnq2vCHZwia4aO9XO\nPSFqLTroKbwHc0jrx316AeD3qbk6Wxk5203T3L3CLfloaCmJ/iODr2ptLGG+2D16\nMgsZt1/7ISvo6o2xTURBrshlpY9Tv9uEqtxvSO4fzWlmYt+N4wRZ5NqwdhhU6iTX\nD0g0Nox2O3wncrJwc0J9zRuCStrjmuzo7Xuj59x3gQKBgQDWa9pWy1sET8mBo+xt\no98Kl7qruDOzOjbY7taER0vjJWLOcW1QQwYg2Zp4aofnq2s91dmYjYAdRLirfsIf\nt+SNfS2fiPjo7L0aa367TH5kFPRRkHi2YHECG/3l1sGncL3l1F0hCAbHl3X0Rbwi\njBmgRStHNCXxrEeX58f5ldZEwQKBgQDIaWebiBg6zvLnwPQngUxgWzbCuCHqEboM\nvE8ljPMxS0pn46XoPCOSCPBrCVd879SI9JOpG2fokhlV+2bSATCS13VStoRfh33n\ndW649keRN8G0ZSeWhQ3xq4xWwZKpg0nvrJdaRSLm6nSyUdv084m4iHwtQF+1p/x7\ntJ/6etIw9wKBgQCpViHnu8/UluJv1LKKYAlshylwJhgGamoYZn7ZlqjS6ZqfqSqI\nYXY8iT2Z7aAJEPKvseyXsuBDvRsOrRvICuWf7AUU4gqZgSVS8SPz7VQ/2+Cbbbo3\nZfC5lrusQS9M+heuo0ktJfact/v6fvw2WGiAjz+/iuqQcttTl0Px0yiVwQKBgQCp\nMVNm2t6Zx10KiruVHnN8ZYU1nn4DPjPzzIaFDRnC4+1NB8No7FybTTCrLJfPwimL\n9e8zNQ/kKHN7Q2LqqFZ5oaxKyAu5GooQffOb8084Kfo+caeaS3oaLNmt5H4M3ent\njae5beSpTgZ3BOTNR01dnNw417/1fHyLc1IcBNSuwQKBgHLkl5KwRWJi1lS1PS1g\nG5W5VzvpUFnP96sIn44fNk28TqXdaGnYYwiFISU1GuGnUTDyiWiQH/GtV3pnkt7T\nJlfopzWOxtoMCYkYqJBJRHRXCALsE2cBynfA315T2Bsq0n2u+mpW/KxdFviKCzWa\n3S3GnDZXEvmI1HLEMxPZnW2s\n-----END PRIVATE KEY-----\n",
+  "client_email": "duqhan-service@tangential-box-171303.iam.gserviceaccount.com",
+  "client_id": "113568282610439788847",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/duqhan-service%40tangential-box-171303.iam.gserviceaccount.com"
+}

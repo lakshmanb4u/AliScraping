@@ -31,10 +31,9 @@ import com.google.cloud.storage.StorageOptions;
 public class GoogleBucketFileUploader {
     // https://cloud.google.com/java/getting-started/using-cloud-storage
 
-    private static final String PROJECT_ID = "tangential-box-171303";
-    private static final String USER_BUCKET_NAME = "duqhan-users";
-    private static final String PRODUCT_BUCKET_NAME = "duqhan-product";
-    private static final String OLD_PRODUCT_BUCKET_NAME = "duqhan-images";
+    private static final String PROJECT_ID =  "tangential-box-171303";
+   // private static final String PRODUCT_BUCKET_NAME = "duqhan-product";
+    private static final String PRODUCT_BUCKET_NAME = "duqhan-images-poc";
     private static final String JSON_PATH = "/DUQHAN-e19d56eacc29.json";
 
     private Storage authentication() {
@@ -56,10 +55,11 @@ public class GoogleBucketFileUploader {
 
     public static String uploadProductImage(String url, Long productId) {
         String imgUrl = "failure";
+        InputStream input = null;
         try {
             GoogleBucketFileUploader fileUploader = new GoogleBucketFileUploader();
             Storage storage = fileUploader.authentication();
-            InputStream input = new URL(url).openStream();
+            input = new URL(url).openStream();
             if (input != null) {
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("-YYYY-MM-dd-HHmmssSSS");
                 DateTime dt = DateTime.now(DateTimeZone.UTC);
@@ -79,6 +79,14 @@ public class GoogleBucketFileUploader {
             }
         } catch (Exception ex) {
             Logger.getLogger(GoogleBucketFileUploader.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+        	if(input != null)
+				try {
+					input.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
         }
         return imgUrl;
     }

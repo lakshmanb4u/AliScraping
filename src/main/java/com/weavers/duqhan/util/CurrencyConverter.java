@@ -6,25 +6,48 @@
 package com.weavers.duqhan.util;
 
 import java.io.IOException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.DefaultHttpClient;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.mashape.unirest.http.JsonNode;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 /**
  *
  * @author weaversAndroid
  */
 public class CurrencyConverter {
+	public static Map<String,String> ratesByDate = new HashMap<String,String>();
+	public static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	static {
+		new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+	}
 
-    public static Double convert(String currencyFrom, String currencyTo) throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpGet = new HttpGet("http://quote.yahoo.com/d/quotes.csv?s=" + currencyFrom + currencyTo + "=X&f=l1&e=.csv");
-        ResponseHandler<String> responseHandler = new BasicResponseHandler();
-        String responseBody = httpclient.execute(httpGet, responseHandler);
-        httpclient.getConnectionManager().shutdown();
-        return Double.parseDouble(responseBody);
+    public static Double convert(String currencyFrom, String currencyTo) throws IOException, UnirestException {
+        //http://api.fixer.io/latest?symbols=INR,USD&base=USD
+    	Date thisDate = new Date();
+    	String date1 = sdf.format(thisDate);
+    	String rate = ratesByDate.get(date1);
+    	if(rate != null){
+    		return Double.parseDouble(rate);
+    	}
+    	
+    	
+    	String date2 = sdf.format(new Date(thisDate.getTime() - 1000*60*60*24L));
+    	rate = ratesByDate.get(date2);
+    	if(rate != null){
+    		return Double.parseDouble(rate);
+    	}
+    	
+    	JsonNode node = Unirest.get("http://api.fixer.io/latest?symbols="+currencyTo+"&base="+currencyFrom)
+		.asJson().getBody();
+		String date = node.getObject().getString("date");//format 2017-11-01
+		rate = node.getObject().getJSONObject("rates").get(currencyTo).toString();
+		ratesByDate.put(date, rate);
+		return Double.parseDouble(rate);
     }
 
     public static Double usdTOinr(Double usdValue) {

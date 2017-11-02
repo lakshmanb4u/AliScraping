@@ -9,22 +9,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -35,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
 import com.scrapping.engine.bean.ProductDetailsLinks;
-import com.weavers.duqhan.business.impl.ProductServiceImpl;
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductImgDao;
@@ -46,6 +32,7 @@ import com.weavers.duqhan.dao.TemtproductlinklistDao;
 import com.weavers.duqhan.dao.VendorDao;
 import com.weavers.duqhan.domain.Category;
 import com.weavers.duqhan.domain.Product;
+import com.weavers.duqhan.domain.ProductImg;
 import com.weavers.duqhan.domain.ProductProperties;
 import com.weavers.duqhan.domain.ProductPropertiesMap;
 import com.weavers.duqhan.domain.ProductPropertyvalues;
@@ -53,6 +40,7 @@ import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.dto.AxpProductDto;
 import com.weavers.duqhan.dto.SkuVal;
 import com.weavers.duqhan.util.CurrencyConverter;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 
 @Component
 public class ScheduledTasks2 {
@@ -319,12 +307,16 @@ public class ScheduledTasks2 {
                                                 if (element.hasClass("item-sku-image")) {
                                                     valu = element.select("a img[src]").get(0).absUrl("src").split(".jpg")[0] + ".jpg";
                                                     String title = element.select("a img").get(0).attr("title");
-                                                    String imgUrl = "";// GoogleBucketFileUploader.uploadProductImage(valu, savedTestProduct.getId());
+                                                    String imgUrl =  GoogleBucketFileUploader.uploadProductImage(valu, savedTestProduct.getId());
                                                     valu = "<img src='" + imgUrl + "' title='" + title + "' style='height:40px; width:40px;'/>";
                                                 } else if (element.hasClass("item-sku-color")) {
-                                                    String style = cssdoc.html().split("sku-color-" + id)[1].split("}")[0].substring(1);
-                                                    valu = "<span style='" + style + "' ; height:40px; width:40px; display:block;'></span>";
-                                                } else {
+                                                    if(cssdoc.html().length() == 0){
+                                                    	 valu = element.select("a span").toString();
+                                                    } else {
+                                                    	String style = cssdoc.html().split("sku-color-" + id)[1].split("}")[0].substring(1);
+                                                    	valu = "<span style='" + style + "' ; height:40px; width:40px; display:block;'></span>";
+                                                    	}
+                                                    } else {
                                                     valu = element.select("a span").toString();
                                                 }
                                                 //System.out.println("valu === " + valu);
@@ -398,7 +390,7 @@ public class ScheduledTasks2 {
                                     detailMain = doc.select("ul.image-thumb-list span.img-thumb-item img[src]");
                                     int flg = 0;
                                     String imgUrl = "";
-                                    /*
+                                    
                                     for (Element element : detailMain) {
                                         imgUrl = GoogleBucketFileUploader.uploadProductImage(element.absUrl("src").split(".jpg")[0] + ".jpg", savedTestProduct.getId());
                                         if (flg == 0) {
@@ -411,7 +403,7 @@ public class ScheduledTasks2 {
                                             productImg.setProductId(savedTestProduct.getId());
                                             productImgDao.save(productImg);
                                         }
-                                    }*/
+                                    }
                                     
                                     //============= Multiple Image Block END =============//
 
