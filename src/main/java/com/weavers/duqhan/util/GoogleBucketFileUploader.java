@@ -32,8 +32,8 @@ public class GoogleBucketFileUploader {
     // https://cloud.google.com/java/getting-started/using-cloud-storage
 
     private static final String PROJECT_ID =  "tangential-box-171303";
-   // private static final String PRODUCT_BUCKET_NAME = "duqhan-product";
-    private static final String PRODUCT_BUCKET_NAME = "duqhan-images-poc";
+    private static final String PRODUCT_BUCKET_NAME = "duqhan-product";
+    //private static final String PRODUCT_BUCKET_NAME = "duqhan-images-poc";
     private static final String JSON_PATH = "/DUQHAN-e19d56eacc29.json";
 
     private Storage authentication() {
