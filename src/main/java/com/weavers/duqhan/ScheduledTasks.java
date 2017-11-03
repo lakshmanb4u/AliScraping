@@ -60,12 +60,13 @@ public class ScheduledTasks {
 			
 			if(!productUrlList.isEmpty()) {
 				handlingPagination(productUrlList,productListLink.getId());
+				productListLink.setStatus(1);
+				productListLink.setEndedAt(new Date());
+				productListLinkDao.save(productListLink);
 			} else {
 				System.out.println("Something went wrong");
 			}
-			productListLink.setStatus(1);
-			productListLink.setEndedAt(new Date());
-			productListLinkDao.save(productListLink);
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

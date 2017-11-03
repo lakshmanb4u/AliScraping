@@ -20,11 +20,8 @@ import org.jsoup.nodes.Document;
 public class Utility {
 	
 	private static final String[] proxies = {
-			/*"mamidilaxmanlnu:EHnMqzod@173.246.165.22:60099",
-			"mamidilaxmanlnu:EHnMqzod@173.246.167.254:60099",*/
-			//"pxu1039-0:ySza*EciKXT$U$G713uu@x.botproxy.net:8080",	
-			//"Lakshmanb4u:Duqhan01@open.proxymesh.com:31280",		
-			"Lakshmanb4u:Duqhan01@sg.proxymesh.com:31280",
+			"Lakshmanb4u:Duqhan01@au.proxymesh.com:31280",
+			"Lakshmanb4u:Duqhan01@sg.proxymesh.com:31280"
 			};
 			
 	private static final String[] servers = {
