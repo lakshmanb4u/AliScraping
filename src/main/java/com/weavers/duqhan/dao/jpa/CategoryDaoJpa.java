@@ -5,6 +5,7 @@
  */
 package com.weavers.duqhan.dao.jpa;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.NoResultException;
@@ -27,9 +28,29 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
     }
 
     @Override
+    public List<Category> loadByIds(List<Long> ids) {
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        String q = "SELECT c FROM Category AS c WHERE c.id IN (";
+        int i = 0;
+        String s = "";
+        for (Long categoryId : ids) {
+            s = s + (i == 0 ? "" : ",") + ":id" + i++;
+        }
+        Query query = getEntityManager().createQuery(q + s + ")");
+        i = 0;
+        for (Long categoryId : ids) {
+            query.setParameter("id" + i++, categoryId);
+        }
+        return query.getResultList();
+    }
+
+    @Override
     public List<Category> getChildByParentId(Long parentId) {
-        Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId");
+        Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.parentId=:parentId AND c.quantity>:quantity");
         query.setParameter("parentId", parentId);
+        query.setParameter("quantity", 0l);
         return query.getResultList();
     }
 
@@ -43,5 +64,4 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
             return null;
         }
     }
-
 }

@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.weavers.duqhan.business;
+package com.weavers.duqhan.dao;
 
-import com.weavers.duqhan.dto.StatusBean;
+import com.weavers.duqhan.domain.Color;
 import java.util.List;
 
 /**
  *
  * @author Android-3
  */
-public interface ProductService {
+public interface ColorDao extends BaseDao<Color> {
 
-      void loadTempProducts(List<StatusBean> statusBeans);
+    List<Color> loadByIds(List<Long> colorIds);
 }

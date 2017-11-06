@@ -48,7 +48,7 @@ public class ProductListLink extends BaseDomain {
 		this.endedAt = endedAt;
 	}
 
-    public String getLink() {
+	public String getLink() {
         return link;
     }
 

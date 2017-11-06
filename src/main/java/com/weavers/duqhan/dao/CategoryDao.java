@@ -14,6 +14,8 @@ import java.util.List;
  */
 public interface CategoryDao extends BaseDao<Category> {
 
+    List<Category> loadByIds(List<Long> ids);
+    
     List<Category> getChildByParentId(Long parentId);
     
     Category getCategoryByName(String name);

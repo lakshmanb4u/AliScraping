@@ -29,4 +29,6 @@ public interface ProductDao extends BaseDao<Product> {
     List<Product> getProductsByCategoryIncludeChild(Long categoryId, int start, int limit);
 
     Product getProductByExternelLink(String link);
+    
+    boolean isAnyProductInCategoryId(Long categoryId);
 }

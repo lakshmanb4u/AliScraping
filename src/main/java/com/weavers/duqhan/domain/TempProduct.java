@@ -16,14 +16,19 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+/**
+ *
+ * @author weaversAndroid
+ */
 @Entity
-@Table(name = "product")
-public class Product extends BaseDomain {
+@Table(name = "temp_product")
+public class TempProduct extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 255)
+    @Lob
+    @Size(min = 1, max = 65535)
     @Column(name = "name")
     private String name;
     @Basic(optional = false)
@@ -47,10 +52,11 @@ public class Product extends BaseDomain {
     @Basic(optional = false)
     @NotNull
     @Column(name = "vendor_id")
-    private Long vendorId;
+    private long vendorId;
     @Size(max = 20)
     @Column(name = "shipping_time")
     private String shippingTime;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "shipping_rate")
     private Double shippingRate;
     @Basic(optional = false)
@@ -58,8 +64,12 @@ public class Product extends BaseDomain {
     @Size(min = 1, max = 255)
     @Column(name = "parent_path")
     private String parentPath;
+    @Lob
+    @Size(max = 65535)
     @Column(name = "external_link")
     private String externalLink;
+    @Lob
+    @Size(max = 65535)
     @Column(name = "specifications")
     private String specifications;
 
@@ -103,11 +113,11 @@ public class Product extends BaseDomain {
         this.lastUpdate = lastUpdate;
     }
 
-    public Long getVendorId() {
+    public long getVendorId() {
         return vendorId;
     }
 
-    public void setVendorId(Long vendorId) {
+    public void setVendorId(long vendorId) {
         this.vendorId = vendorId;
     }
 
@@ -127,16 +137,10 @@ public class Product extends BaseDomain {
         this.shippingRate = shippingRate;
     }
 
-    /**
-     * @return the parentPath
-     */
     public String getParentPath() {
         return parentPath;
     }
 
-    /**
-     * @param parentPath the parentPath to set
-     */
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
@@ -156,5 +160,4 @@ public class Product extends BaseDomain {
     public void setSpecifications(String specifications) {
         this.specifications = specifications;
     }
-
 }
