@@ -6,10 +6,14 @@
 package com.weavers.duqhan.domain;
 
 import java.util.Date;
+import java.util.List;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Lob;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,6 +25,31 @@ import javax.validation.constraints.Size;
 public class Product extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "vendor_id")
+    private long vendorId;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "properties")
+    private String properties;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_height")
+    private double productHeight;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_length")
+    private double productLength;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_weight")
+    private double productWeight;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "product_width")
+    private double productWidth;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -44,10 +73,6 @@ public class Product extends BaseDomain {
     @Column(name = "last_update")
     @Temporal(TemporalType.TIMESTAMP)
     private Date lastUpdate;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "vendor_id")
-    private Long vendorId;
     @Size(max = 20)
     @Column(name = "shipping_time")
     private String shippingTime;
@@ -62,6 +87,8 @@ public class Product extends BaseDomain {
     private String externalLink;
     @Column(name = "specifications")
     private String specifications;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "productId", cascade = CascadeType.ALL)
+    private List<ProductPropertiesMap> ProductPropertiesMaps;
 
     public String getName() {
         return name;
@@ -155,6 +182,60 @@ public class Product extends BaseDomain {
 
     public void setSpecifications(String specifications) {
         this.specifications = specifications;
+    }
+
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
+    }
+
+    public double getProductHeight() {
+        return productHeight;
+    }
+
+    public void setProductHeight(double productHeight) {
+        this.productHeight = productHeight;
+    }
+
+    public double getProductLength() {
+        return productLength;
+    }
+
+    public void setProductLength(double productLength) {
+        this.productLength = productLength;
+    }
+
+    public double getProductWeight() {
+        return productWeight;
+    }
+
+    public void setProductWeight(double productWeight) {
+        this.productWeight = productWeight;
+    }
+
+    public double getProductWidth() {
+        return productWidth;
+    }
+
+    public void setProductWidth(double productWidth) {
+        this.productWidth = productWidth;
+    }
+
+    /**
+     * @return the ProductPropertiesMaps
+     */
+    public List<ProductPropertiesMap> getProductPropertiesMaps() {
+        return ProductPropertiesMaps;
+    }
+
+    /**
+     * @param ProductPropertiesMaps the ProductPropertiesMaps to set
+     */
+    public void setProductPropertiesMaps(List<ProductPropertiesMap> ProductPropertiesMaps) {
+        this.ProductPropertiesMaps = ProductPropertiesMaps;
     }
 
 }

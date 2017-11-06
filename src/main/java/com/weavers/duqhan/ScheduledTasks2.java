@@ -1,12 +1,16 @@
 package com.weavers.duqhan;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -19,331 +23,430 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.scrapping.engine.bean.ProductDetailsLinks;
 import com.weavers.duqhan.dao.CategoryDao;
-import com.weavers.duqhan.dao.ColorDao;
-import com.weavers.duqhan.dao.TempProductDao;
-import com.weavers.duqhan.dao.TempProductImgDao;
-import com.weavers.duqhan.dao.TempProductSizeColorMapDao;
+import com.weavers.duqhan.dao.ProductDao;
+import com.weavers.duqhan.dao.ProductImgDao;
+import com.weavers.duqhan.dao.ProductPropertiesDao;
+import com.weavers.duqhan.dao.ProductPropertiesMapDao;
+import com.weavers.duqhan.dao.ProductPropertyvaluesDao;
 import com.weavers.duqhan.dao.TemtproductlinklistDao;
 import com.weavers.duqhan.domain.Category;
-import com.weavers.duqhan.domain.Color;
-import com.weavers.duqhan.domain.TempProduct;
-import com.weavers.duqhan.domain.TempProductImg;
-import com.weavers.duqhan.domain.TempProductSizeColorMap;
+import com.weavers.duqhan.domain.Product;
+import com.weavers.duqhan.domain.ProductImg;
+import com.weavers.duqhan.domain.ProductProperties;
+import com.weavers.duqhan.domain.ProductPropertiesMap;
+import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.dto.AxpProductDto;
-import com.weavers.duqhan.dto.ImageDto;
-import com.weavers.duqhan.dto.ProductBean;
-import com.weavers.duqhan.dto.SizeColorMapDto;
 import com.weavers.duqhan.dto.SkuVal;
 import com.weavers.duqhan.util.CurrencyConverter;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 
 @Component
 public class ScheduledTasks2 {
-	
+	@Autowired
+    private ProductDao productDao;
     @Autowired
     private CategoryDao categoryDao;
     @Autowired
+    private ProductImgDao productImgDao;
+    @Autowired
     private TemtproductlinklistDao temtproductlinklistDao;
     @Autowired
-    private TempProductDao tempProductDao;
+    private ProductPropertiesDao productPropertiesDao;
     @Autowired
-    private ColorDao colorDao;
+    private ProductPropertyvaluesDao productPropertyvaluesDao;
     @Autowired
-    private TempProductSizeColorMapDao tempProductSizeColorMapDao;
-    @Autowired
-    private TempProductImgDao tempProductImgDao;
+    private ProductPropertiesMapDao productPropertiesMapDao;
     
     @Scheduled(fixedRate=3*60*1000)
     public void loadTempProducts() {
-//        List<Temtproductlinklist> temtproductlinklists = temtproductlinklistDao.getUnprocessedTempProduct();
-        String status = "failure";
-        int i = 0;
-        while (i < 100) {
-            status = "failure";
-            Temtproductlinklist temtproductlinklist = temtproductlinklistDao.getRandomeUnprocessedTempProduct();
-            //if(temtproductlinklist == null) break;
-            //Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
-            if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
-                TempProduct tempProduct = tempProductDao.getProductByExternelLink(temtproductlinklist.getLink());
-                if (tempProduct == null) {
-                	temtproductlinklist.setStatus(5);
-                	temtproductlinklistDao.save(temtproductlinklist);
-                    ProductBean productBean = null;
-                    String value = "";
-                    Elements detailMain;
-                    Elements detailSub;
-                    Elements specifics;
-                    double votes = 0.0;
-                    double stars = 0.0;
-                    double feedback = 0.0;
-                    String url = temtproductlinklist.getLink();
-                    try {
-                        productBean = new ProductBean();
-                        Document doc = Utility.connect(url);
-                        detailMain = doc.select(".rantings-num");
-                        if (!detailMain.isEmpty()) {
-                            votes = Double.valueOf(detailMain.text().split(" votes")[0].split("\\(")[1]);
-                        }
-                        detailMain = doc.select(".percent-num");
-                        if (!detailMain.isEmpty()) {
-                            stars = Double.valueOf(detailMain.text());
-                        }
-                        detailMain = doc.select("ul.ui-tab-nav li[data-trigger='feedback'] a");
-                        if (!detailMain.isEmpty()) {
-                            feedback = Double.valueOf(detailMain.text().split("\\(")[1].split("\\)")[0]);
-                        }
-                        if (votes > 20.0 && stars > 4.8 && feedback > 4.0) {
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setName(detailMain.text().substring(0, Math.min(detailMain.text().length(), 50)));
+    	 boolean isSuccess = true;
+         String startDate = new Date().toString();
+         Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Starting  Scheduler 2");
+         try {
+             String status = "";
+             int i = 0;
+             while (i < 100) {
+             	
+                 status = "Link duplicate";
+                 Temtproductlinklist temtproductlinklist = temtproductlinklistDao.getRandomeUnprocessedTempProduct();
+                 if(temtproductlinklist == null) break;
+                 //Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
+                 if (temtproductlinklist != null && temtproductlinklist.getStatus() == 0) {
+                 	 Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Starting  Scheduler 2" + temtproductlinklist.getLink() );
+                     Product testProduct = productDao.getProductByExternelLink(temtproductlinklist.getLink());
+                     if (testProduct == null) {
+                     	temtproductlinklist.setStatus(5);
+                     	temtproductlinklistDao.save(temtproductlinklist);
+                         String value = "";
+                         Elements detailMain;
+                         Elements detailSub;
+                         Elements specifics;
+                         double votes = 0.0;
+                         double stars = 0.0;
+                         double feedback = 0.0;
+                         String url = temtproductlinklist.getLink();
+                         try {
+                             testProduct = new Product();
+                             Product savedTestProduct;
+                
+                             Document doc = Utility.connect(url);
+                             detailMain = doc.select("#j-detail-page");
+                             if (!detailMain.isEmpty()) {
 
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setDescription(detailMain.text());
+                                 //=================== Criteria Block START==================//
+                                 detailMain = doc.select(".rantings-num");
+                                 if (!detailMain.isEmpty()) {
+                                     try {
+                                 	votes = Double.valueOf(detailMain.text().split(" votes")[0].split("\\(")[1]);
+                                     } catch(NumberFormatException e) {
+                                     	e.printStackTrace();
+                                     }
+                                 }
+                                 detailMain = doc.select(".percent-num");
+                                 if (!detailMain.isEmpty()) {
+                                     stars = Double.valueOf(detailMain.text());
+                                 }
+                                 detailMain = doc.select("ul.ui-tab-nav li[data-trigger='feedback'] a");
+                                 if (!detailMain.isEmpty()) {
+                                     feedback = Double.valueOf(detailMain.text().split("\\(")[1].split("\\)")[0]);
+                                 }
+                                 //=================== Criteria Block END==================//
 
-                            detailMain = doc.select(".detail-wrap .product-name");
-                            productBean.setDescription(detailMain.text());
+                                 if (1==1 || votes > 10.0 && stars > 4.0 && feedback > 4.0) {
+                                     detailMain = doc.select(".detail-wrap .product-name");
+                                     testProduct.setName(detailMain.text());/*.substring(0, Math.min(detailMain.text().length(), 50))*/
+                                     detailMain = doc.select(".detail-wrap .product-name");
+                                     testProduct.setDescription(detailMain.text());
+                                     testProduct.setExternalLink(url);
+                                     testProduct.setVendorId(1l);//??????????????????????
 
-                            productBean.setVendorId(3l);//??????????????????????
-                            detailMain = doc.select("div.ui-breadcrumb div.container a");
-                            String newCategory = detailMain.last().text();
-                            System.out.println("newCategory == " + newCategory);
-                            Category category = categoryDao.getCategoryByName(newCategory);
-                            if (category != null) {
-                                productBean.setCategoryId(category.getId());
-                            } else {
-                                Category parentCategory = categoryDao.getCategoryByName("Jewellery");
-                                category = new Category();
-                                category.setId(null);
-                                category.setName(newCategory);
-                                category.setParentId(parentCategory.getId());
-                                category.setParentPath(parentCategory.getParentPath() + parentCategory.getId() + "=");
-                                Category category2 = categoryDao.save(category);
-                                productBean.setCategoryId(category2.getId());
-                            }
+                                     //=================== Packaging block START==================//
+                                     Double weight = 1.0;
+                                     Double width = 1.0;
+                                     Double height = 1.0;
+                                     Double length = 1.0;
+                                     detailMain = doc.select("div#j-product-desc div.pnl-packaging-main ul li.packaging-item");
+                                     for (Element element : detailMain) {
+                                         String packagingTitle = element.select("span.packaging-title").text();
+                                         String packagingDesc = element.select("span.packaging-des").text();
+                                         if (packagingTitle.trim().equals("Package Weight:")) {
+                                             String str = packagingDesc;
+                                             str = str.replaceAll("[^.?0-9]+", " ");
+                                             if (Arrays.asList(str.trim().split(" ")) != null) {
+                                                 if (!Arrays.asList(str.trim().split(" ")).isEmpty()) {
+                                                     try {
+                                                         weight = Double.parseDouble(Arrays.asList(str.trim().split(" ")).get(0));
+                                                     } catch (Exception e) {
+                                                         weight = 1.0;
+                                                     }
+                                                 }
+                                             }
+                                            // System.out.println("weight == " + weight);
+                                         } else if (packagingTitle.trim().equals("Package Size:")) {
+                                             String str = packagingDesc;
+                                             str = str.replaceAll("[^.?0-9]+", " ");
+                                             if (Arrays.asList(str.trim().split(" ")) != null) {
+                                                 if (!Arrays.asList(str.trim().split(" ")).isEmpty()) {
+                                                     try {
+                                                         width = Double.parseDouble(Arrays.asList(str.trim().split(" ")).get(0));
+                                                         height = Double.parseDouble(Arrays.asList(str.trim().split(" ")).get(1));
+                                                         length = Double.parseDouble(Arrays.asList(str.trim().split(" ")).get(2));
+                                                     } catch (Exception e) {
+                                                         width = 1.0;
+                                                         height = 1.0;
+                                                         length = 1.0;
+                                                     }
+                                                 }
+                                             }
+                                             //System.out.println("width == " + width);
+                                             //System.out.println("height == " + height);
+                                             //System.out.println("length == " + length);
+                                         }
+                                     }
+                                     //=================== Packaging block END==================//
 
-                            productBean.setExternalLink(url);
+                                     //=================== Category block START==================//
+                                     detailMain = doc.select("div.ui-breadcrumb div.container a");
+                                     Long productCategoryId = 0L;
+                                     String parentPath = "";
+                                     String thisCategory = detailMain.last().text().trim();
+                                     //System.out.println("thisCategory == " + thisCategory);
+                                     Category parentCategory = new Category();
+                                     parentCategory.setId(0L);
+                                     parentCategory.setParentPath("");
+                                     for (Element element : detailMain) {
+                                         String newCategory;
+                                         newCategory = element.text().trim();
+                                         //System.out.println("newCategory======" + newCategory);
+                                         if (newCategory.equals("Home") || newCategory.equals("All Categories")) {
+                                         } else {
+                                             Category category = categoryDao.getCategoryByName(newCategory);
+                                             if (category != null) {
+                                                 if (category.getName().equals(thisCategory)) {
+                                                     productCategoryId = category.getId();
+                                                     parentPath = category.getParentPath();
+                                                 }
+                                                 parentCategory = category;
+                                             } else {
+                                                 category = new Category();
+                                                 category.setId(null);
+                                                 category.setName(newCategory);
+                                                 category.setParentId(parentCategory.getId());
+                                                 category.setParentPath(parentCategory.getParentPath() + parentCategory.getId() + "=");
+                                                 category.setQuantity(0);
+                                                 category.setImgUrl("-");
+                                                 category.setDisplayText(newCategory);
+                                                 Category category2 = categoryDao.save(category);
+                                                 if (category.getName().equals(thisCategory)) {
+                                                     productCategoryId = category2.getId();
+                                                     parentPath = category2.getParentPath();
+                                                 }
+                                                 parentCategory = category2;
+                                             }
+                                         }
+                                     }
+                                     //=================== Category block END==================//
 
-                            detailMain = doc.select(".product-property-list .property-item");
-                            String specifications = "";
-                            for (Element element : detailMain) {
-                                specifications = specifications + element.select(".propery-title").get(0).text().replace(",", "/").replace(":", "-") + ":" + element.select(".propery-des").get(0).text().replace(",", "/").replace(":", "-") + ",";//TODO:, check
-                            }
-                            productBean.setSpecifications(specifications);
+                                     //=============== Specifications block START==============//
+                                     detailMain = doc.select(".product-property-list .property-item");
+                                     String specifications = "";
+                                     for (Element element : detailMain) {
+                                         specifications = specifications + element.select(".propery-title").get(0).text().replace(",", "/").replace(":", "-") + ":" + element.select(".propery-des").get(0).text().replace(",", "/").replace(":", "-") + ",";//TODO:, check
+                                     }
+                                     //=============== Specifications Block END==============//
 
-                            detailMain = doc.select(".shipping-days[data-role='delivery-days']");
-                            System.out.println("value detailMain" + detailMain.toString());
-                            value = detailMain.text();
-//            productBean.setShippingTime(value);
-                            productBean.setShippingTime("45");
+                                     //=============== Shipping Time Block START==============//
+                                     String shippingTime = "";
+                                     detailMain = doc.select(".shipping-days[data-role='delivery-days']");
+                                     //System.out.println("value detailMain" + detailMain.toString());
+                                     shippingTime = detailMain.text();
+                                     //=============== Shipping Time Block END==============//
 
-                            detailMain = doc.select(".logistics-cost");
-                            value = detailMain.text();
-                            double discountPrice = 0.0;
-                            double actualPrice = 0.0;
-                            double markupPrice = 0.0;
-                            if (!value.equalsIgnoreCase("Free Shipping")) {
-//                f = Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1"));
-                            }
-                            productBean.setShippingRate(0.0);
+                                     //=============== Shipping Cost Block START==============//
+                                     detailMain = doc.select(".logistics-cost");
+                                     value = detailMain.text();
+                                     if (!value.equalsIgnoreCase("Free Shipping")) {
+//                                         f = 0.00;
+                                     } else {
+//                                         f = Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1"));
+                                     }
+                                     //=============== Shipping Cost Block END==============//
 
-                            //====multiple ProductSizeColorMap added=======//
-                            //---------------------
-                            int flag = 0;
-                            specifics = doc.select("#j-product-info-sku dl.p-property-item");
-                            List<String> arrPropIds = new ArrayList<>();
-                            List<String> arrPropIds2 = new ArrayList<>();
-                            HashMap<String, AxpProductDto> AxpProductMap = new HashMap();
-                            String id = "";
-                            for (Element specific : specifics) {
-                                detailSub = specific.select("dd ul li");
-                                System.out.println("head  ==== " + specific.select("dt").text());
-                                for (Element element : detailSub) {
-                                    if (flag > 0) {
-                                        id = element.select("a[data-sku-id]").attr("data-sku-id").trim();
+                                     //=================Product save 1st START==============//
+                                     testProduct.setCategoryId(productCategoryId);
+                                     testProduct.setLastUpdate(new Date());
+                                     testProduct.setParentPath(parentPath);
+                                     testProduct.setImgurl("-");
+                                     testProduct.setProperties("-");
+                                     testProduct.setProductWidth(width);
+                                     testProduct.setProductLength(length);
+                                     testProduct.setProductWeight(weight);
+                                     testProduct.setProductHeight(height);
+                                     testProduct.setShippingRate(0.0);
+                                     testProduct.setShippingTime("45");
+                                     testProduct.setSpecifications(specifications);
+                                     savedTestProduct = productDao.save(testProduct);
+                                     //====================Product save 1st END==============//
 
-                                        Iterator<String> iter = arrPropIds.iterator();
-                                        while (iter.hasNext()) {
-                                            String arrPropId = iter.next();
-                                            iter.remove();
-                                            arrPropId = arrPropId + "," + id;
-                                            arrPropIds2.add(arrPropId);
-                                        }
-                                        arrPropIds.addAll(arrPropIds2);
-                                        arrPropIds2.removeAll(arrPropIds);
-                                        break;
-                                    } else {
-                                        arrPropIds.add(element.select("a[data-sku-id]").attr("data-sku-id").trim());
-                                        if (element.hasClass("item-sku-image")) {
-//                            System.out.println("img== " + element.select("a img").attr("title"));
-                                        } else {
-//                            System.out.println("span== " + element.select("a span").toString());
-                                        }
-                                    }
-                                }
-                                flag++;
-                            }
-                            List<AxpProductDto> axpProductDtos = new ArrayList<>();
-                            Elements scripts = doc.select("script"); // Get the script part
-                            for (Element script : scripts) {
-                                if (script.html().contains("var skuProducts=")) {
-                                    String jsonData = "";
-                                    jsonData = script.html().split("var skuProducts=")[1].split("var GaData")[0].trim();
-                                    jsonData = jsonData.substring(0, jsonData.length() - 1);
-                                    //System.out.println("script ======= " + jsonData);
-                                    Gson gsonObj = new Gson();
-                                    axpProductDtos = Arrays.asList(gsonObj.fromJson(jsonData, AxpProductDto[].class));
-                                    for (AxpProductDto axpProductDto : axpProductDtos) {
-                                        if (arrPropIds.contains(axpProductDto.getSkuPropIds())) {//if prisent in id list
-                                            AxpProductMap.put(axpProductDto.getSkuPropIds(), axpProductDto);
-                                        }
-                                    }
-                                }
-                            }
-                            //---------------------
-                            List<SizeColorMapDto> sizeColorMapDtos = new ArrayList<>();
-                            for (HashMap.Entry<String, AxpProductDto> entry : AxpProductMap.entrySet()) {
-                                String thisId = entry.getKey();
-                                AxpProductDto thisAxpProductDto = entry.getValue();
-                                SkuVal skuVal = thisAxpProductDto.getSkuVal();
-                                if (skuVal.getActSkuCalPrice() != null) {
-                                    value = skuVal.getActSkuCalPrice().trim();
-                                    discountPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    value = skuVal.getSkuCalPrice().trim();
-                                    actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    markupPrice = discountPrice * 0.15 + 100;
-                                    discountPrice = Math.ceil((discountPrice + markupPrice) / 10) * 10;;
-                                    actualPrice = Math.round(actualPrice + markupPrice);
-                                } else {
-                                    discountPrice = 0.0;
-                                    value = skuVal.getSkuCalPrice().trim();
-                                    actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                    markupPrice = actualPrice * 0.15 + 100;
-                                    discountPrice = Math.round(actualPrice + markupPrice);
-                                    actualPrice = Math.round(actualPrice + markupPrice);
-                                }
+                                     //========= Property, Property Value, Property Product Map Block START ========//
+                                     double discountPrice = 0.0;
+                                     double actualPrice = 0.0;
+                                     double markupPrice = 0.0;
+                                     String id = "";
+                                     String allProperties = "";
+                                     //------------------------Read Color css START---------------------//
+                                     specifics = doc.select("#j-product-info-sku dl.p-property-item");
+                                     Elements cssdetailMain = doc.select("link[href]");
+                                     Document cssdoc = new Document("");
+                                     //System.out.println("====================================================cssdetailMain" + cssdetailMain.size());
+                                     for (Element element : cssdetailMain) {
+                                         String cssurl = element.attr("abs:href");
+                                         if (cssurl.contains("??main-detail")) {
+                                             try {
+                                                 cssdoc = Utility.connect(cssurl);
+                                             } catch (IOException ex) {
 
-                                SizeColorMapDto sizeColorMapDto = new SizeColorMapDto();
+                                             }
+                                             break;
+                                         }
+                                     }
+                                     //-----------------------Read Color css END--------------------------//
 
-                                if (thisAxpProductDto.getSkuAttr().split("#").length > 1) {
-                                    Color color = new Color();
-                                    color.setName(thisAxpProductDto.getSkuAttr().split("#")[1].split(";")[0]);
-                                    color.setCode(" ");
-                                    sizeColorMapDto.setColorId(colorDao.save(color).getId()/*null*/);//?????????????????????
-                                } else {
-                                    sizeColorMapDto.setColorId(null);//?????????????????????
-                                }
-                                sizeColorMapDto.setSizeId(null);//??????????????????????
-//            TimeUnit.SECONDS.sleep(10);
-                                detailMain = doc.select("#j-sku-price");
-                                System.out.println("value2 detailMain" + detailMain.text());
-                                /*value = detailMain.text();/////??????????????????????*/
-//                value = "0.25";
-                                sizeColorMapDto.setSalesPrice(discountPrice);
-                                sizeColorMapDto.setOrginalPrice(actualPrice);
-                                sizeColorMapDto.setCount(1l);
-                                sizeColorMapDto.setProductWidth(1.0);
-                                sizeColorMapDto.setProductLength(1.0);
-                                sizeColorMapDto.setProductWeight(1.0);
-                                sizeColorMapDto.setProductHeight(1.0);
-                                sizeColorMapDtos.add(sizeColorMapDto);
-                            }
-                            productBean.setSizeColorMaps(sizeColorMapDtos);
+                                     //-----------Product Property, Property Value START--------//
+                                     Map<String, ProductPropertyvalues> propertyValuesMap = new HashMap<>();
+                                     if (!specifics.isEmpty()) {
+                                         ProductProperties testPorperties;
+                                         ProductProperties saveTestPorperties;
+                                         ProductPropertyvalues testPropertyValues;
+                                         for (Element specific : specifics) {
+                                             //System.out.println("head  ==== " + specific.select("dt").text());
+                                             testPorperties = productPropertiesDao.loadByName(specific.select("dt").text());
+                                             if (testPorperties == null) {
+                                                 testPorperties = new ProductProperties();
+                                                 testPorperties.setPropertyName(specific.select("dt").text());
+                                                 saveTestPorperties = productPropertiesDao.save(testPorperties);
+                                             } else {
+                                                 saveTestPorperties = testPorperties;
+                                             }
+                                             allProperties = allProperties + saveTestPorperties.getId().toString() + "-";
+                                             detailSub = specific.select("dd ul li");
+                                             String valu = "-";
+                                             for (Element element : detailSub) {
+                                                 testPropertyValues = new ProductPropertyvalues();
+                                                 id = element.select("a[data-sku-id]").attr("data-sku-id").trim();
+                                                 testPropertyValues.setRefId(id);
+                                                 if (element.hasClass("item-sku-image")) {
+                                                     valu = element.select("a img[src]").get(0).absUrl("src").split(".jpg")[0] + ".jpg";
+                                                     String title = element.select("a img").get(0).attr("title");
+                                                     String imgUrl =  GoogleBucketFileUploader.uploadProductImage(valu, savedTestProduct.getId());
+                                                     valu = "<img src='" + imgUrl + "' title='" + title + "' style='height:40px; width:40px;'/>";
+                                                 } else if (element.hasClass("item-sku-color")) {
+                                                     if(cssdoc.html().length() == 0){
+                                                     	 valu = element.select("a span").toString();
+                                                     } else {
+                                                     	String style = cssdoc.html().split("sku-color-" + id)[1].split("}")[0].substring(1);
+                                                     	valu = "<span style='" + style + "' ; height:40px; width:40px; display:block;'></span>";
+                                                     	}
+                                                     } else {
+                                                     valu = element.select("a span").toString();
+                                                 }
+                                                 //System.out.println("valu === " + valu);
+                                                 testPropertyValues.setProductId(savedTestProduct.getId());
+                                                 testPropertyValues.setPropertyId(saveTestPorperties.getId());
+                                                 testPropertyValues.setValueName(valu);
+                                                 propertyValuesMap.put(id, productPropertyvaluesDao.save(testPropertyValues));
+                                             }
+                                         }
+                                         savedTestProduct.setProperties(allProperties);
+                                     }
+                                     //-----------Product Property, Property Value END--------//
 
-                            //===========multiple image add==========//
-                            List<ImageDto> imageDtos = new ArrayList<>();//loop
-                            detailMain = doc.select("ul.image-thumb-list span.img-thumb-item img[src]");
-                            int flg = 0;
-                            for (Element element : detailMain) {
-                                if (flg == 0) {
-                                    flg++;
-                                    productBean.setImgurl(element.absUrl("src").split(".jpg")[0] + ".jpg");
-                                } else {
-                                    ImageDto imageDto = new ImageDto();
-                                    imageDto.setImgUrl(element.absUrl("src").split(".jpg")[0] + ".jpg");
-                                    imageDtos.add(imageDto);
-                                }
-                            }
-                            productBean.setImageDtos(imageDtos);
-                            if (this.saveTempProduct(productBean).equals("success")) {
-                                temtproductlinklist.setStatus(1);//
-                                temtproductlinklistDao.save(temtproductlinklist);
-                                status = "success";
-                            }
-                        } else {
-                            temtproductlinklist.setStatus(2);//
-                            temtproductlinklistDao.save(temtproductlinklist);
-                            status = "criteria mismatch";
-                        }
-                    } catch (Exception ex) {
-                        System.out.println("Exception === " + ex);
-                        java.util.logging.Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else {
-                    temtproductlinklist.setStatus(3);//
-                    temtproductlinklistDao.save(temtproductlinklist);
-                    status = "product exsist";
-                }
-            }
+                                     //----------------------Read json START------------------//
+                                     List<AxpProductDto> axpProductDtos = new ArrayList<>();
+                                     Elements scripts = doc.select("script"); // Get the script part
+                                     for (Element script : scripts) {
+                                         if (script.html().contains("var skuProducts=")) {
+                                             String jsonData = "";
+                                             jsonData = script.html().split("var skuProducts=")[1].split("var GaData")[0].trim();
+                                             jsonData = jsonData.substring(0, jsonData.length() - 1);
+                                             Gson gsonObj = new Gson();
+                                             axpProductDtos = Arrays.asList(gsonObj.fromJson(jsonData, AxpProductDto[].class));
+                                             break;
+                                         }
+                                     }
+                                     //----------------------Read json END------------------//
+
+                                     //-------------Product Properties Map START------------//
+                                     for (AxpProductDto thisAxpProductDto : axpProductDtos) {
+                                         SkuVal skuVal = thisAxpProductDto.getSkuVal();
+                                         if (skuVal.getActSkuCalPrice() != null) {
+                                             value = skuVal.getActSkuCalPrice().trim();
+                                             discountPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             value = skuVal.getSkuCalPrice().trim();
+                                             actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             markupPrice = discountPrice * 0.15 + 100;
+                                             discountPrice = Math.ceil((discountPrice + markupPrice) / 10) * 10;
+                                             actualPrice = Math.round(actualPrice + markupPrice);
+                                         } else {
+                                             discountPrice = 0.0;
+                                             value = skuVal.getSkuCalPrice().trim();
+                                             actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             markupPrice = actualPrice * 0.15 + 100;
+                                             discountPrice = Math.round(actualPrice + markupPrice);
+                                             actualPrice = Math.round(actualPrice + markupPrice);
+                                         }
+
+                                         ProductPropertiesMap productPropertyMap = new ProductPropertiesMap();
+                                         String myPropValueIds = "";
+                                         if (thisAxpProductDto.getSkuAttr() != null) {
+                                             String[] skuPropIds = thisAxpProductDto.getSkuPropIds().split(",");
+                                             for (String skuPropId : skuPropIds) {
+                                                 myPropValueIds = myPropValueIds + propertyValuesMap.get(skuPropId).getId().toString() + "_";
+                                             }
+
+                                             productPropertyMap.setPropertyvalueComposition(myPropValueIds);
+                                         } else {
+                                             productPropertyMap.setPropertyvalueComposition("_");
+                                         }
+                                         productPropertyMap.setDiscount(discountPrice);
+                                         productPropertyMap.setPrice(actualPrice);
+                                         productPropertyMap.setProductId(savedTestProduct);
+                                         productPropertyMap.setQuantity(5l);
+                                         productPropertiesMapDao.save(productPropertyMap);
+                                     }
+                                     //-------------Product Properties Map START------------//
+                                     //========= Property, Property Value, Property Product Map Block END ========//
+
+                                     //============= Multiple Image Block START =============//
+                                     detailMain = doc.select("ul.image-thumb-list span.img-thumb-item img[src]");
+                                     int flg = 0;
+                                     String imgUrl = "";
+                                     
+                                     for (Element element : detailMain) {
+                                         imgUrl = GoogleBucketFileUploader.uploadProductImage(element.absUrl("src").split(".jpg")[0] + ".jpg", savedTestProduct.getId());
+                                         if (flg == 0) {
+                                             flg++;
+                                             savedTestProduct.setImgurl(imgUrl);
+                                         } else {
+                                             ProductImg productImg = new ProductImg();
+                                             productImg.setId(null);
+                                             productImg.setImgUrl(imgUrl);
+                                             productImg.setProductId(savedTestProduct.getId());
+                                             productImgDao.save(productImg);
+                                         }
+                                     }
+                                     
+                                     //============= Multiple Image Block END =============//
+
+                                     //=================Product save final START==============//
+                                     if (productDao.save(savedTestProduct) != null) {
+                                         temtproductlinklist.setStatus(1);//
+                                         
+                                         temtproductlinklistDao.save(temtproductlinklist);
+                                         status = "Success";
+                                     }
+                                     //=================Product save final START==============//
+                                 } else {
+                                     temtproductlinklist.setStatus(2);//
+                                     temtproductlinklistDao.save(temtproductlinklist);
+                                     status = "criteria mismatch";
+                                 }
+                             } else {
+                                 status = "Page not found";
+                             }
+                         } catch (Exception ex) {
+                             temtproductlinklist.setStatus(4);//
+                             StringWriter sw = new StringWriter();
+                             PrintWriter pw = new PrintWriter(sw);
+                             ex.printStackTrace(pw);
+                             String sStackTrace = sw.toString();
+                             temtproductlinklist.setError(sStackTrace);
+                             temtproductlinklistDao.save(temtproductlinklist);
+                             ex.printStackTrace();
+                             status = "Failure";
+                         }
+                     } else {
+                         temtproductlinklist.setStatus(3);//
+                         temtproductlinklistDao.save(temtproductlinklist);
+                         status = "Product exsist";
+                     }
+                     i++;
+                 }
+             }
+         } catch (Exception e) {
+             isSuccess = false;
+             String body = "(==E==)DATE: " + new Date().toString() + "Store product details in temp product table get error.....<br/> Started on" + startDate + "<br/>";
+             Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.SEVERE, body, e);
+         }
+         if (isSuccess) {
+         	Logger.getLogger(ScheduledTasks2.class.getName()).log(Level.INFO, "Stopping At  Scheduler");
+             
             
-        }
+         }
         
     }
     
-    private String saveTempProduct(ProductBean productBean) {
-        String status = "ERROR: Product can not be saved!!";
-        if (productBean != null) {
-            Category parentCategory = categoryDao.loadById(productBean.getCategoryId());//>>>>>>>>>>>>>>
-            TempProduct product = new TempProduct();
-            product.setId(null);
-            product.setName(productBean.getName());//>>>>>>>>>>>>>>>>>
-            product.setImgurl(productBean.getImgurl());//>>>>>>>>>>>>>>>>
-            product.setCategoryId(productBean.getCategoryId());//>>>>>>>>>>>
-            product.setDescription(productBean.getDescription());//>>>>>>>>>>>>>>>>
-            product.setLastUpdate(new Date());
-            product.setVendorId(productBean.getVendorId());     //>>>>>>>>>>>>>>>>>
-            product.setParentPath(parentCategory.getParentPath());
-            product.setExternalLink(productBean.getExternalLink()); //>>>>>>>>>>>>>>
-            product.setSpecifications(productBean.getSpecifications());//>>>>>>>>>>>>
-            product.setShippingTime(productBean.getShippingTime());
-            product.setShippingRate(productBean.getShippingRate());
-            TempProduct product1 = tempProductDao.save(product);
-            if (product1 != null) {
-                //====multiple ProductSizeColorMap added=======//
-                List<SizeColorMapDto> sizeColorMapDtos = productBean.getSizeColorMaps();//>>>>>>>>>>>>>>
-                if (!sizeColorMapDtos.isEmpty()) {
-                    for (SizeColorMapDto sizeColorMapDto : sizeColorMapDtos) {
-                        TempProductSizeColorMap sizeColorMap = new TempProductSizeColorMap();
-                        sizeColorMap.setId(null);
-                        sizeColorMap.setColorId(sizeColorMapDto.getColorId());
-                        sizeColorMap.setSizeId(sizeColorMapDto.getSizeId());
-                        sizeColorMap.setDiscount(sizeColorMapDto.getSalesPrice());
-                        sizeColorMap.setPrice(sizeColorMapDto.getOrginalPrice());
-                        sizeColorMap.setQuantity(sizeColorMapDto.getCount());
-                        sizeColorMap.setProductId(product1.getId());
-                        sizeColorMap.setProductHeight(sizeColorMapDto.getProductHeight());
-                        sizeColorMap.setProductLength(sizeColorMapDto.getProductLength());
-                        sizeColorMap.setProductWeight(sizeColorMapDto.getProductWeight());
-                        sizeColorMap.setProductWidth(sizeColorMapDto.getProductWidth());
-                        TempProductSizeColorMap sizeColorMap1 = tempProductSizeColorMapDao.save(sizeColorMap);
-                    }
-                }
-
-                //===========multiple image add==========//
-                List<ImageDto> imageDtos = productBean.getImageDtos();//>>>>>>>>>>>>
-                if (!imageDtos.isEmpty()) {
-                    for (ImageDto imageDto : imageDtos) {
-                        TempProductImg productImg = new TempProductImg();
-                        productImg.setId(null);
-                        productImg.setImgUrl(imageDto.getImgUrl());
-                        productImg.setProductId(product1.getId());
-                        tempProductImgDao.save(productImg);
-                    }
-                }
-                status = "success";
-            }
-        }
-        return status;
-    }
-   
 	@Async
 	private  void saveLinksToDB(List<ProductDetailsLinks> productDetailsLinks, String urlOfListPage) {
 		System.out.println("Saving" + urlOfListPage);

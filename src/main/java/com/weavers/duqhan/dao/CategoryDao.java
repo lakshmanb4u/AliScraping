@@ -8,14 +8,15 @@ package com.weavers.duqhan.dao;
 import com.weavers.duqhan.domain.Category;
 import java.util.List;
 
+import org.springframework.stereotype.Repository;
+
 /**
  *
  * @author Android-3
  */
+@Repository
 public interface CategoryDao extends BaseDao<Category> {
 
-    List<Category> loadByIds(List<Long> ids);
-    
     List<Category> getChildByParentId(Long parentId);
     
     Category getCategoryByName(String name);

@@ -36,6 +36,10 @@ public class RecentView extends BaseDomain{
     @Column(name = "view_date")
     @Temporal(TemporalType.DATE)
     private Date viewDate;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "visit_count")
+    private long visitCount;
 
     public long getUserId() {
         return userId;
@@ -61,5 +65,12 @@ public class RecentView extends BaseDomain{
         this.viewDate = viewDate;
     }
 
-    
+    public long getVisitCount() {
+        return visitCount;
+    }
+
+    public void setVisitCount(long visitCount) {
+        this.visitCount = visitCount;
+    }
+
 }
