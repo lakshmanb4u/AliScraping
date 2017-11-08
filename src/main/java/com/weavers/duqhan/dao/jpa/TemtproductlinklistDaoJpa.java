@@ -37,7 +37,7 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
     
     public Temtproductlinklist getRandomeUnprocessedTempProduct() {
     	//todo remove parent_url= logic 
-    	Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status =" + 0 + " and tp.parentUrl = 3 ORDER BY RAND()");
+    	Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status =" + 0 + " and parent_url is not null  ORDER BY RAND()");
     	query.setMaxResults(1);
     	List<Temtproductlinklist> list = query.getResultList();
     	if(!list.isEmpty()) {

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
  *
  * @author Android-3
  */
-@Repository
+
 public interface CategoryDao extends BaseDao<Category> {
 
     List<Category> getChildByParentId(Long parentId);

@@ -10,6 +10,8 @@ import java.util.List;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import org.springframework.stereotype.Repository;
+
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.domain.Category;
 
@@ -18,6 +20,7 @@ import com.weavers.duqhan.domain.Category;
  * @author Android-3
  */
 
+@Repository
 public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao {
 
     public CategoryDaoJpa() {
