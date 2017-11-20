@@ -111,4 +111,11 @@ public class ProductDaoJpa extends BaseDaoJpa<Product> implements ProductDao {
             return new Product();
         }
     }
+
+	@Override
+	public List<Product> getNoThumbnail() {
+		Query query = getEntityManager().createQuery("SELECT p FROM Product AS p WHERE p.thumbImg is null")
+				.setMaxResults(100);
+        return query.getResultList();
+	}
 }

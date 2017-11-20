@@ -17,10 +17,13 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.scrapping.engine.bean.ProductDetailsLinks;
+import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.TemtproductlinklistDao;
 import com.weavers.duqhan.dao.jpa.ProductListLinkDaoJpa;
+import com.weavers.duqhan.domain.Product;
 import com.weavers.duqhan.domain.ProductListLink;
 import com.weavers.duqhan.domain.Temtproductlinklist;
+import com.weavers.duqhan.util.GoogleBucketFileUploader;
 
 @Component
 public class ScheduledTasks {
@@ -31,6 +34,8 @@ public class ScheduledTasks {
 	@Autowired
 	ProductListLinkDaoJpa productListLinkDao;
 	
+	@Autowired
+    private ProductDao productDao;
 	
 	@Scheduled(fixedRate = 60*1000)
 	public void schedule() {
@@ -154,4 +159,17 @@ public class ScheduledTasks {
 		System.out.println("Done" + urlOfListPage);
 		
 	}
+
+	@Scheduled(fixedRate = 120*1000)
+    public void makeThumbnailImage() {
+    	List<Product> products = productDao.getNoThumbnail();
+        for(Product p: products) {
+        	System.out.println(p.getId());
+        	String thumbImage = GoogleBucketFileUploader.uploadThumbProductImage(p.getImgurl(),p.getId());
+        	p.setThumbImg(thumbImage);
+        	productDao.save(p);
+        }
+    	
+    }
+
 }
