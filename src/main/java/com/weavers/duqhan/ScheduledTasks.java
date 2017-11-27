@@ -102,7 +102,11 @@ public class ScheduledTasks {
             if(!singleProductUrls.isEmpty()) {
     			handlingSingleProductUrl(singleProductUrls,nexturl,id);
     		} else {
-    			System.out.println("Might be end of list, but not sure please debug for url ");
+    			singleProductUrls = doc.select(".list-item .img a[href]");
+    			if(!singleProductUrls.isEmpty()) {
+        			handlingSingleProductUrl(singleProductUrls,nexturl,id);
+        		} else {	
+	    			System.out.println("Might be end of list, but not sure please debug for url ");
     			String titleOfPage = doc.title();
     			
     			if("AliExpress.com - Maintaining".equalsIgnoreCase(titleOfPage)){
