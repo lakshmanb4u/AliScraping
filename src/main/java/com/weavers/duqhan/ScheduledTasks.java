@@ -107,23 +107,24 @@ public class ScheduledTasks {
         			handlingSingleProductUrl(singleProductUrls,nexturl,id);
         		} else {	
 	    			System.out.println("Might be end of list, but not sure please debug for url ");
-    			String titleOfPage = doc.title();
-    			
-    			if("AliExpress.com - Maintaining".equalsIgnoreCase(titleOfPage)){
-    				Thread.currentThread().sleep(5000); //chilling out
-    				i--; //TODO
-    			} else if ("Buy Products Online from China Wholesalers at Aliexpress.com".equalsIgnoreCase(titleOfPage)) {
-    				Thread.currentThread().sleep(5000); //chilling out
-    				i--; //TODO: Need to add logic to avoid dead-loop.
-    			}
-    			else if("".equalsIgnoreCase(titleOfPage)) {
-    				System.out.println(titleOfPage + " Breaking now...");
-    				break;
-    			} else {
-    				System.out.println(titleOfPage + " Breaking now...");
-    				System.out.println(doc);
-    				break;
-    			}
+	    			String titleOfPage = doc.title();
+	    			
+	    			if("AliExpress.com - Maintaining".equalsIgnoreCase(titleOfPage)){
+	    				Thread.currentThread().sleep(5000); //chilling out
+	    				i--; //TODO
+	    			} else if ("Buy Products Online from China Wholesalers at Aliexpress.com".equalsIgnoreCase(titleOfPage)) {
+	    				Thread.currentThread().sleep(5000); //chilling out
+	    				i--; //TODO: Need to add logic to avoid dead-loop.
+	    			}
+	    			else if("".equalsIgnoreCase(titleOfPage)) {
+	    				System.out.println(titleOfPage + " Breaking now...");
+	    				break;
+	    			} else {
+	    				System.out.println(titleOfPage + " Breaking now...");
+	    				System.out.println(doc);
+	    				break;
+	    			}
+        		}
     		}
             
         }
