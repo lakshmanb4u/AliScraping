@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Implementation-Title: Scrapper
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: tushar
+Implementation-Vendor-Id: com.scrapping
+Build-Jdk: 1.8.0_151
+Implementation-URL: http://projects.spring.io/spring-boot/aliexpress/
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+

@@ -261,10 +261,11 @@ public class ScheduledTasks2 {
                                      Document cssdoc = new Document("");
                                      //System.out.println("====================================================cssdetailMain" + cssdetailMain.size());
                                      for (Element element : cssdetailMain) {
-                                         String cssurl = element.attr("abs:href");
+                                         String cssurl = element.attr("href");
                                          if (cssurl.contains("??main-detail")) {
+                                        	 String cssUrl = "https:"+cssurl;
                                              try {
-                                                 cssdoc = Utility.connect(cssurl);
+                                                 cssdoc = Utility.connect(cssUrl);
                                              } catch (IOException ex) {
 
                                              }
@@ -305,9 +306,14 @@ public class ScheduledTasks2 {
                                                      if(cssdoc.html().length() == 0){
                                                      	 valu = element.select("a span").toString();
                                                      } else {
-                                                     	String style = cssdoc.html().split("sku-color-" + id)[1].split("}")[0].substring(1);
-                                                     	valu = "<span style='" + style + "' ; height:40px; width:40px; display:block;'></span>";
-                                                     	}
+                                                     	if(cssdoc.html().contains("sku-color-" + id)){
+                                                        	String style = cssdoc.html().split("sku-color-" + id)[1].split("}")[0].substring(1);
+                                                        	valu = "<span style='" + style + ";height:40px;width:40px;display:block;'></span>";
+                                                        	}else{
+                                                        	String style="background:#FFF!important";
+                                                        	valu = "<span style='" + style + ";height:40px;width:40px;display:block;'></span>";	
+                                                        	}
+                                                        	}
                                                      } else {
                                                      valu = element.select("a span").toString();
                                                  }
@@ -341,16 +347,16 @@ public class ScheduledTasks2 {
                                      for (AxpProductDto thisAxpProductDto : axpProductDtos) {
                                          SkuVal skuVal = thisAxpProductDto.getSkuVal();
                                          if (skuVal.getActSkuCalPrice() != null) {
-                                             value = skuVal.getActSkuCalPrice().trim();
+                                             value = skuVal.getActSkuCalPrice().trim().replaceAll(",", "");
                                              discountPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
-                                             value = skuVal.getSkuCalPrice().trim();
+                                             value = skuVal.getSkuCalPrice().trim().replaceAll(",", "");
                                              actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
                                              markupPrice = discountPrice * 0.15 + 100;
                                              discountPrice = Math.ceil((discountPrice + markupPrice) / 10) * 10;
                                              actualPrice = Math.round(actualPrice + markupPrice);
                                          } else {
                                              discountPrice = 0.0;
-                                             value = skuVal.getSkuCalPrice().trim();
+                                             value = skuVal.getSkuCalPrice().trim().replaceAll(",", "");
                                              actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
                                              markupPrice = actualPrice * 0.15 + 100;
                                              discountPrice = Math.round(actualPrice + markupPrice);
