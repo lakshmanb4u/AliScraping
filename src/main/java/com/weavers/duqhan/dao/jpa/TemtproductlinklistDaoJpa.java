@@ -46,6 +46,19 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
     		return null;
     	}
     }
+    
+    @Override
+    public Temtproductlinklist getTempProductToRecrawl() {
+    	//todo remove parent_url= logic 
+    	Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status =" + 7 + " and parent_url is not null  ORDER BY RAND()");
+    	query.setMaxResults(1);
+    	List<Temtproductlinklist> list = query.getResultList();
+    	if(!list.isEmpty()) {
+    		return (Temtproductlinklist)list.get(0);
+    	} else {
+    		return null;
+    	}
+    }
 
     @Override
     public List<Temtproductlinklist> getAllTempProduct(int start, int limit) {

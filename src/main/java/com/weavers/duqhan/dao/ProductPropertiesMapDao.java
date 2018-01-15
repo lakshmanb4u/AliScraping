@@ -13,4 +13,5 @@ import com.weavers.duqhan.domain.ProductPropertiesMap;
  */
 public interface ProductPropertiesMapDao extends BaseDao<ProductPropertiesMap>{
     
+	ProductPropertiesMap loadByProductIdAndPropertyvalueComposition(Long productId,String composition);
 }

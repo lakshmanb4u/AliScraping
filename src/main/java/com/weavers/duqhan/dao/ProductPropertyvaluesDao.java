@@ -12,5 +12,6 @@ import com.weavers.duqhan.domain.ProductPropertyvalues;
  * @author weaversAndroid
  */
 public interface ProductPropertyvaluesDao extends BaseDao<ProductPropertyvalues>{
-    
+	
+	ProductPropertyvalues loadByProductIdAndPropertyIdAndRefId(Long productId,Long proprtyId,String refId);
 }
