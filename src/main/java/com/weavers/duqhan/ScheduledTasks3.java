@@ -58,7 +58,7 @@ public class ScheduledTasks3 {
     public void loadTempProducts() {
     	 boolean isSuccess = true;
          String startDate = new Date().toString();
-         Logger.getLogger(ScheduledTasks3.class.getName()).log(Level.INFO, "Starting  Scheduler 2");
+         Logger.getLogger(ScheduledTasks3.class.getName()).log(Level.INFO, "Starting  Scheduler 3");
          try {
              String status = "";
              int i = 0;
@@ -72,7 +72,7 @@ public class ScheduledTasks3 {
                  if(temtproductlinklist == null) break;
                  //Temtproductlinklist temtproductlinklist = temtproductlinklistDao.loadById(statusBean.getId());
                  if (temtproductlinklist != null && temtproductlinklist.getStatus() == 7) {
-                 	 Logger.getLogger(ScheduledTasks3.class.getName()).log(Level.INFO, "Starting  Scheduler 2" + temtproductlinklist.getLink() );
+                 	 Logger.getLogger(ScheduledTasks3.class.getName()).log(Level.INFO, "Starting  Scheduler 3" + temtproductlinklist.getLink() );
                      Product testProduct = productDao.getProductByExternelLink(temtproductlinklist.getLink());
                      if (testProduct != null) {
                      	temtproductlinklist.setStatus(5);
@@ -246,9 +246,12 @@ public class ScheduledTasks3 {
                                          }
                                      }
                                  } else {
+                                	 temtproductlinklist.setStatus(6);
+                                   	temtproductlinklistDao.save(temtproductlinklist);
                                  }
                              } else {
-                                 
+                            	 temtproductlinklist.setStatus(6);
+                               	temtproductlinklistDao.save(temtproductlinklist);
                              }
                          } catch (Exception ex) {
                              temtproductlinklist.setStatus(4);//
@@ -265,9 +268,12 @@ public class ScheduledTasks3 {
                       	temtproductlinklistDao.save(temtproductlinklist);
                              
                      } else {
+                    	 temtproductlinklist.setStatus(6);
+                       	temtproductlinklistDao.save(temtproductlinklist);
                      }
-                     i++;
+                     
                  }
+                 i++;
              }
          } catch (Exception e) {
              isSuccess = false;
