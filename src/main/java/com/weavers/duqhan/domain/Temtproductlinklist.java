@@ -18,7 +18,7 @@ import javax.validation.constraints.Size;
  * @author weaversAndroid
  */
 @Entity
-@Table(name = "temtproductlinklist")
+@Table(name = "myntra_temtproductlinklist")
 public class Temtproductlinklist extends BaseDomain {
 
     private static final long serialVersionUID = 1L;
@@ -40,7 +40,30 @@ public class Temtproductlinklist extends BaseDomain {
     @Column(name = "parent_url")
 	private Long parentUrl;
 
-    public String getError() {
+    
+    @Column(name = "category_name")
+    private String categoryName;
+
+    @Column(name = "page_number")
+	private Integer pageNumber;
+    
+    public String getCategoryName() {
+		return categoryName;
+	}
+
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
+	}
+
+    public Integer getPageNumber() {
+		return pageNumber;
+	}
+
+	public void setPageNumber(Integer pageNumber) {
+		this.pageNumber = pageNumber;
+	}
+
+	public String getError() {
 		return error;
 	}
 

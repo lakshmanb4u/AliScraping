@@ -7,6 +7,7 @@ package com.weavers.duqhan.domain;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -27,8 +28,51 @@ public class Product extends BaseDomain {
     private static final long serialVersionUID = 1L;
     @Basic(optional = false)
     @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "category_id")
+    private long categoryId;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "description")
+    private String description;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "imgurl")
+    private String imgurl;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "last_update")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date lastUpdate;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "vendor_id")
-    private long vendorId;
+    private Long vendorId;
+    @Size(max = 20)
+    @Column(name = "shipping_time")
+    private String shippingTime;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "shipping_rate")
+    private Double shippingRate;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(name = "parent_path")
+    private String parentPath;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "external_link")
+    private String externalLink;
+    @Lob
+    @Size(max = 65535)
+    @Column(name = "specifications")
+    private String specifications;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 255)
@@ -50,56 +94,29 @@ public class Product extends BaseDomain {
     @NotNull
     @Column(name = "product_width")
     private double productWidth;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "name")
-    private String name;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "category_id")
-    private long categoryId;
-    @Lob
-    @Size(max = 65535)
-    @Column(name = "description")
-    private String description;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "imgurl")
-    private String imgurl;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "last_update")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date lastUpdate;
-    @Size(max = 20)
-    @Column(name = "shipping_time")
-    private String shippingTime;
-    @Column(name = "shipping_rate")
-    private Double shippingRate;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 255)
-    @Column(name = "parent_path")
-    private String parentPath;
-    @Column(name = "external_link")
-    private String externalLink;
-    @Column(name = "specifications")
-    private String specifications;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "productId", cascade = CascadeType.ALL)
     private List<ProductPropertiesMap> ProductPropertiesMaps;
     
+    @Column(name = "like_unlike_count")
+    private long likeUnlikeCount;
+    
+    @Column(name = "link_id")
+    private long linkId;
+
     @Column(name = "thumb_img")
     private String thumbImg;
+    
+    @Column(name = "deleted")
+    private boolean deleted;
 
-    public String getThumbImg() {
-		return thumbImg;
-	}
-
+	public String getThumbImg() {
+		 return thumbImg;
+	 }
+	
 	public void setThumbImg(String thumbImg) {
-		this.thumbImg = thumbImg;
-	}
+		 this.thumbImg = thumbImg;
+	 }
+	 
 
     public String getName() {
         return name;
@@ -248,5 +265,31 @@ public class Product extends BaseDomain {
     public void setProductPropertiesMaps(List<ProductPropertiesMap> ProductPropertiesMaps) {
         this.ProductPropertiesMaps = ProductPropertiesMaps;
     }
+
+	public long getLikeUnlikeCount() {
+		return likeUnlikeCount;
+	}
+
+	public void setLikeUnlikeCount(long likeUnlikeCount) {
+		this.likeUnlikeCount = likeUnlikeCount;
+	}
+
+	public long getLinkId() {
+		return linkId;
+	}
+
+	public void setLinkId(long linkId) {
+		this.linkId = linkId;
+	}
+
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	
+	
 
 }

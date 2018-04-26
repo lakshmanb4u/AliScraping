@@ -37,7 +37,7 @@ public class ScheduledTasks {
 	@Autowired
     private ProductDao productDao;
 	
-	@Scheduled(fixedRate = 60*1000)
+	//@Scheduled(fixedRate = 60*1000)
 	public void schedule() {
 		Logger.getLogger(ScheduledTasks.class.getName()).log(Level.INFO, "Starting  Scheduler 1");
         
@@ -165,7 +165,7 @@ public class ScheduledTasks {
 		
 	}
 
-	@Scheduled(fixedRate = 120*1000)
+	//@Scheduled(fixedRate = 120*1000)
     public void makeThumbnailImage() {
     	List<Product> products = productDao.getNoThumbnail();
         for(Product p: products) {

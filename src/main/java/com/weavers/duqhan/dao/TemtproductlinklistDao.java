@@ -23,4 +23,6 @@ public interface TemtproductlinklistDao extends BaseDao<Temtproductlinklist> {
     Temtproductlinklist getRandomeUnprocessedTempProduct();
 
 	Temtproductlinklist getTempProductToRecrawl();
+	
+	Temtproductlinklist getPageNumberByCategoryName(String categoryName);
 }

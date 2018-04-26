@@ -41,4 +41,16 @@ public class ProductPropertyvaluesDaoJpa extends BaseDaoJpa<ProductPropertyvalue
     	}
 	}
 
+	@Override
+	public List<ProductPropertyvalues> loadByProductId(Long productId) {
+		Query query = getEntityManager().createQuery("SELECT p FROM ProductPropertyvalues AS p WHERE p.productId=:productId");
+		query.setParameter("productId", productId);
+		
+    	List<ProductPropertyvalues> list = query.getResultList();
+    	if(!list.isEmpty()) {
+    		return list;
+    	} else {
+    		return null;
+    	}
+	}
 }

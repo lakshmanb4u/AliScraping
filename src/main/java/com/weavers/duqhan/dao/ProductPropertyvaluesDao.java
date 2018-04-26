@@ -5,6 +5,8 @@
  */
 package com.weavers.duqhan.dao;
 
+import java.util.List;
+
 import com.weavers.duqhan.domain.ProductPropertyvalues;
 
 /**
@@ -14,4 +16,5 @@ import com.weavers.duqhan.domain.ProductPropertyvalues;
 public interface ProductPropertyvaluesDao extends BaseDao<ProductPropertyvalues>{
 	
 	ProductPropertyvalues loadByProductIdAndPropertyIdAndRefId(Long productId,Long proprtyId,String refId);
+	List<ProductPropertyvalues> loadByProductId(Long productId);
 }

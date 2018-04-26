@@ -78,4 +78,19 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
             return new Temtproductlinklist();
         }
     }
+    
+    public Temtproductlinklist getPageNumberByCategoryName(String categoryName) {
+    	try {
+            Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.categoryName =:categoryname ORDER BY tp.pageNumber DESC");
+            query.setParameter("categoryname", categoryName);
+            query.setMaxResults(1);
+            return (Temtproductlinklist) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        } catch (NonUniqueResultException nure) {
+            return new Temtproductlinklist();
+        }
+	
+    }
+    
 }

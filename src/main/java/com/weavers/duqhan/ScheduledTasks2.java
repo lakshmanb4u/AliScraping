@@ -58,7 +58,7 @@ public class ScheduledTasks2 {
     @Autowired
     private ProductPropertiesMapDao productPropertiesMapDao;
     
-    @Scheduled(fixedRate=3*60*1000)
+    //@Scheduled(fixedRate=3*60*1000)
     public void loadTempProducts() {
     	 boolean isSuccess = true;
          String startDate = new Date().toString();

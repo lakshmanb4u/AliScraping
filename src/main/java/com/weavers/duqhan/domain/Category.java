@@ -46,7 +46,49 @@ public class Category extends BaseDomain {
     @Column(name = "display_text")
     private String displayText;
 
-    public String getName() {
+    @Column(name = "is_display")
+    private boolean isDisplay;
+    @Size(max = 255)
+    @Column(name = "menu_icon")
+    private String menuIcon;
+    @Column(name = "price_limit")
+    private String priceLimit;
+    @Column(name = "load_category_id")
+    private String loadCategory;
+    
+    public boolean isDisplay() {
+		return isDisplay;
+	}
+
+	public void setDisplay(boolean isDisplay) {
+		this.isDisplay = isDisplay;
+	}
+
+	public String getMenuIcon() {
+		return menuIcon;
+	}
+
+	public void setMenuIcon(String menuIcon) {
+		this.menuIcon = menuIcon;
+	}
+
+	public String getPriceLimit() {
+		return priceLimit;
+	}
+
+	public void setPriceLimit(String priceLimit) {
+		this.priceLimit = priceLimit;
+	}
+
+	public String getLoadCategory() {
+		return loadCategory;
+	}
+
+	public void setLoadCategory(String loadCategory) {
+		this.loadCategory = loadCategory;
+	}
+
+	public String getName() {
         return name;
     }
 
