@@ -20,4 +20,6 @@ public interface CategoryDao extends BaseDao<Category> {
     List<Category> getChildByParentId(Long parentId);
     
     Category getCategoryByName(String name);
+    
+    Category getCategoryByNameAndId(String name,Long id);
 }

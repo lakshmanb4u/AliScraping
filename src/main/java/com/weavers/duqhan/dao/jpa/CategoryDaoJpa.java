@@ -44,5 +44,17 @@ public class CategoryDaoJpa extends BaseDaoJpa<Category> implements CategoryDao 
             return null;
         }
     }
+    
+    @Override
+    public Category getCategoryByNameAndId(String name,Long id) {
+        try {
+            Query query = getEntityManager().createQuery("SELECT c FROM Category c WHERE c.name=:name and c.parentId=:id");
+            query.setParameter("name", name);
+            query.setParameter("id", id);
+            return (Category) query.getSingleResult();
+        } catch (NoResultException nre) {
+            return null;
+        }
+    }
 
 }

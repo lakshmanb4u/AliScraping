@@ -192,8 +192,8 @@ public class voonikSchedularTask1 {
 		             parentCategory.setId(0L);
 		             parentCategory.setParentPath("");
 		             String newCategory = json.findValue("analytics").findValue("articleType").asText();
-					 Category category = categoryDao.getCategoryByName(newCategory);
-	            	 Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
+		             Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
+		             Category category = categoryDao.getCategoryByNameAndId(newCategory,womensCategory.getId());
 					 if (category != null && category.getParentId() == womensCategory.getId()) {
 		                 productCategoryId = category.getId();
 		                 parentPath = category.getParentPath();
