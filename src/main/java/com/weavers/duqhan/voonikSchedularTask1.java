@@ -153,20 +153,34 @@ public class voonikSchedularTask1 {
 		for(Temtproductlinklist product: productsList) {
 		url = product.getLink();
 		Document doc = Utility.connect(url);
-		
-        String documentText=doc.toString();
-        String stringJson = documentText.substring(documentText.indexOf("window.__myx = ") + 14);
-        stringJson = stringJson.substring(0, stringJson.indexOf("</script> "));
-        ObjectMapper om = new ObjectMapper();
-		JsonNode json = om.readTree(stringJson).get("pdpData");
+		JsonNode json = null;
+		try {
+	        String documentText=doc.toString();
+	        String stringJson = documentText.substring(documentText.indexOf("window.__myx = ") + 14);
+	        stringJson = stringJson.substring(0, stringJson.indexOf("</script> "));
+	        ObjectMapper om = new ObjectMapper();
+			json = om.readTree(stringJson).get("pdpData");
+		} catch(Exception ex) {
+			product.setStatus(4);
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            ex.printStackTrace(pw);
+            String sStackTrace = sw.toString();
+            product.setError(sStackTrace);
+            temtproductlinklistDao.save(product);
+            ex.printStackTrace();
+            status = "Failure";
+            continue;
+		}
+        
 		//System.out.println("\n\n "+json.toString());
 		if(json != null) {
-			Temtproductlinklist temtproductlinklist = new Temtproductlinklist();
+			
 				 Product testProduct = productDao.getProductByExternelLink(url);
 				 if(testProduct == null) {
-					temtproductlinklist.setStatus(5);
-					temtproductlinklist.setLink(url);
-		          	temtproductlinklistDao.save(temtproductlinklist);
+					product.setStatus(5);
+					product.setLink(url);
+		          	temtproductlinklistDao.save(product);
 		          	try {
 					 testProduct = new Product();
 					 Product savedTestProduct;
@@ -318,27 +332,27 @@ public class voonikSchedularTask1 {
 		             }
 		             
 		             if (productDao.save(savedTestProduct) != null) {
-		                 temtproductlinklist.setStatus(1);
+		            	 product.setStatus(1);
 		                 
-		                 temtproductlinklistDao.save(temtproductlinklist);
+		                 temtproductlinklistDao.save(product);
 		                 status = "Success";
 		             }
 		             
 		          	} catch(Exception ex) {
-		          		temtproductlinklist.setStatus(4);
+		          		product.setStatus(4);
 		                StringWriter sw = new StringWriter();
 		                PrintWriter pw = new PrintWriter(sw);
 		                ex.printStackTrace(pw);
 		                String sStackTrace = sw.toString();
-		                temtproductlinklist.setError(sStackTrace);
-		                temtproductlinklistDao.save(temtproductlinklist);
+		                product.setError(sStackTrace);
+		                temtproductlinklistDao.save(product);
 		                ex.printStackTrace();
 		                status = "Failure";
 		          	}
 				 } else {
-					 temtproductlinklist.setStatus(3);
-					 temtproductlinklist.setLink(url);
-		             temtproductlinklistDao.save(temtproductlinklist);
+					 product.setStatus(3);
+					 product.setLink(url);
+		             temtproductlinklistDao.save(product);
 		             status = "Product exsist";
 				 }
 		} else {
