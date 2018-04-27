@@ -22,12 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+//import org.springframework.stereotype.Controller;
+//import org.springframework.web.bind.annotation.CrossOrigin;
+//import org.springframework.web.bind.annotation.PathVariable;
+//import org.springframework.web.bind.annotation.RequestMapping;
+//import org.springframework.web.bind.annotation.RequestMethod;
+//import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,10 +49,10 @@ import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.util.GoogleBucketFileUploader;
 
-@CrossOrigin
+//@CrossOrigin
 @EnableScheduling
 @Configuration
-@Controller
+//@Controller
 public class voonikSchedularTask1 {
 
 	@Autowired
@@ -72,9 +72,9 @@ public class voonikSchedularTask1 {
 	
 	/*@RequestMapping(value="/api/loadUrls", method = RequestMethod.GET)
 	@ResponseBody*/
-	@Scheduled(cron = "* 0 12 27 4 *")
+	@Scheduled(fixedDelay = 1000*60000)
 	public String loadUrls() {
-		try {
+		/*try {
 			List<String> urlList=new ArrayList<>();
 			List<ProductDetailsLinks> productDetailsLinks = new ArrayList<ProductDetailsLinks>();
 			String categoryName[]= {"womens-western-wear","fusion-wear","women-lingerie-sleepwear"};
@@ -127,12 +127,12 @@ public class voonikSchedularTask1 {
 			System.out.println("Saving to db............");
 		} catch(Exception e) {
 			e.printStackTrace();
-		}
-		/*try {
+		}*/
+		try {
 			String resp = getSingleProduct();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}*/
+		}
 		return "success";
 	}
 	
@@ -170,7 +170,7 @@ public class voonikSchedularTask1 {
         stringJson = stringJson.substring(0, stringJson.indexOf("</script> "));
         ObjectMapper om = new ObjectMapper();
 		JsonNode json = om.readTree(stringJson).get("pdpData");
-		System.out.println("\n\n "+json.toString());
+		//System.out.println("\n\n "+json.toString());
 		if(json != null) {
 			Temtproductlinklist temtproductlinklist = new Temtproductlinklist();
 				 Product testProduct = productDao.getProductByExternelLink(url);
