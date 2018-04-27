@@ -9,29 +9,19 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.http.HttpException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.web.bind.annotation.CrossOrigin;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestMethod;
-//import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.scrapping.engine.bean.ProductDetailsLinks;
 import com.weavers.duqhan.dao.CategoryDao;
 import com.weavers.duqhan.dao.ProductDao;
@@ -49,10 +39,9 @@ import com.weavers.duqhan.domain.ProductPropertyvalues;
 import com.weavers.duqhan.domain.Temtproductlinklist;
 import com.weavers.duqhan.util.GoogleBucketFileUploader;
 
-//@CrossOrigin
 @EnableScheduling
 @Configuration
-//@Controller
+
 public class voonikSchedularTask1 {
 
 	@Autowired
@@ -160,7 +149,7 @@ public class voonikSchedularTask1 {
 		Elements detailMain;
 		String status = "";
 		String url = "https://www.myntra.com/bodysuit/miss-chase/miss-chase-women-navy-blue-solid-bodysuit/2466284/buy";
-		List<Temtproductlinklist> productsList = temtproductlinklistDao.loadAll();
+		List<Temtproductlinklist> productsList = temtproductlinklistDao.getAllUnsavedProduct();
 		for(Temtproductlinklist product: productsList) {
 		url = product.getLink();
 		Document doc = Utility.connect(url);
@@ -204,13 +193,12 @@ public class voonikSchedularTask1 {
 		             parentCategory.setParentPath("");
 		             String newCategory = json.findValue("analytics").findValue("articleType").asText();
 					 Category category = categoryDao.getCategoryByName(newCategory);
-					 
-					 if (category != null) {
+	            	 Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
+					 if (category != null && category.getParentId() == womensCategory.getId()) {
 		                 productCategoryId = category.getId();
 		                 parentPath = category.getParentPath();
 		                 parentCategory = category;
 		             } else {
-		            	 Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
 		            	 if(womensCategory != null) {
 		            		 parentCategory = womensCategory;
 		            	 }

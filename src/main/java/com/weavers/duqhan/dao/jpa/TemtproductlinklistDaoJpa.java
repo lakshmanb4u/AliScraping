@@ -67,6 +67,12 @@ public class TemtproductlinklistDaoJpa extends BaseDaoJpa<Temtproductlinklist> i
     }
 
     @Override
+    public List<Temtproductlinklist> getAllUnsavedProduct() {
+        Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.status=0");
+        return query.getResultList();
+    }
+    
+    @Override
     public Temtproductlinklist getTemtproductlinklistByLink(String link) {
         try {
             Query query = getEntityManager().createQuery("SELECT tp FROM Temtproductlinklist AS tp WHERE tp.link =:link");
