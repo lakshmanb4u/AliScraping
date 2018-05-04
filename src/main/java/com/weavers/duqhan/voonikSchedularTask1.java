@@ -63,10 +63,11 @@ public class voonikSchedularTask1 {
 	@ResponseBody*/
 	@Scheduled(fixedDelay = 1000*60000)
 	public String loadUrls() {
-		/*try {
+		try {
 			List<String> urlList=new ArrayList<>();
 			List<ProductDetailsLinks> productDetailsLinks = new ArrayList<ProductDetailsLinks>();
 			String categoryName[]= {"womens-western-wear","fusion-wear","women-lingerie-sleepwear"};
+			//String categoryName[]= {"men-topwear","men-bottomwear","men-ethnic-wear","men-plus-size-menu","men-innerwear","men-sportswear"};
 			int pageCount=0;
 			//select page_number from myntra_temtproductlinklist where category_name="fusion-wear" order by page_number desc limit 1
 			for(String item :categoryName) {
@@ -79,6 +80,7 @@ public class voonikSchedularTask1 {
 				}
 				String mainUrl="https://www.myntra.com/"+item;
 				for(int i=pageNumber;i<9999;i++){
+					try {
 					System.out.println(item +"  Page Number : "+ i);
 					String currentUrl="https://www.myntra.com/web/v2/search/data/"+item+"?f=&p="+i+"&rows=48";
 					URL apiUrl = new URL(currentUrl);
@@ -86,7 +88,7 @@ public class voonikSchedularTask1 {
 					InputStreamReader inputStreamReader = new InputStreamReader(urlConn.getInputStream());
 					BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 					String line = bufferedReader.readLine();
-					System.out.println("string : "+line);
+					//System.out.println("string : "+line);
 					ObjectMapper om = new ObjectMapper();
 					//om.configure(Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
 					JsonNode json = om.readTree(line).get("data").get("results").get("products");
@@ -109,6 +111,10 @@ public class voonikSchedularTask1 {
 					else
 						break;
 					System.out.println("count : "+json.size());
+					} catch(Exception e) {
+						System.out.println("Exception at page number :"+i);
+						e.printStackTrace();
+					}
 				}
 			}
 			System.out.println("Total Page count : "+pageCount);
@@ -116,12 +122,12 @@ public class voonikSchedularTask1 {
 			System.out.println("Saving to db............");
 		} catch(Exception e) {
 			e.printStackTrace();
-		}*/
-		try {
+		}
+		/*try {
 			String resp = getSingleProduct();
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 		return "success";
 	}
 	
