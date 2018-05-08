@@ -59,6 +59,7 @@ public class voonikSchedularTask1 {
 	@Autowired
     private ProductPropertyvaluesDao productPropertyvaluesDao;
 	
+
 	/*@RequestMapping(value="/api/loadUrls", method = RequestMethod.GET)
 	@ResponseBody*/
 	@Scheduled(fixedDelay = 1000*60000)
