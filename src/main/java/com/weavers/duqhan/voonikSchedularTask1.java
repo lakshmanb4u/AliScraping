@@ -66,8 +66,8 @@ public class voonikSchedularTask1 {
 		try {
 			List<String> urlList=new ArrayList<>();
 			List<ProductDetailsLinks> productDetailsLinks = new ArrayList<ProductDetailsLinks>();
-			String categoryName[]= {"womens-western-wear","fusion-wear","women-lingerie-sleepwear"};
-			//String categoryName[]= {"men-topwear","men-bottomwear","men-ethnic-wear","men-plus-size-menu","men-innerwear","men-sportswear"};
+			//String categoryName[]= {"womens-western-wear","fusion-wear","women-lingerie-sleepwear"};
+			String categoryName[]= {"men-topwear","men-bottomwear","men-ethnic-wear","men-plus-size-menu","men-innerwear","men-sportswear"};
 			int pageCount=0;
 			//select page_number from myntra_temtproductlinklist where category_name="fusion-wear" order by page_number desc limit 1
 			for(String item :categoryName) {
@@ -154,7 +154,7 @@ public class voonikSchedularTask1 {
 	public String getSingleProduct() throws HttpException, IOException, InterruptedException{
 		Elements detailMain;
 		String status = "";
-		String url = "https://www.myntra.com/bodysuit/miss-chase/miss-chase-women-navy-blue-solid-bodysuit/2466284/buy";
+		String url = "";
 		List<Temtproductlinklist> productsList = temtproductlinklistDao.getAllUnsavedProduct();
 		for(Temtproductlinklist product: productsList) {
 		url = product.getLink();
@@ -212,7 +212,8 @@ public class voonikSchedularTask1 {
 		             parentCategory.setId(0L);
 		             parentCategory.setParentPath("");
 		             String newCategory = json.findValue("analytics").findValue("articleType").asText();
-		             Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
+		             //Category womensCategory = categoryDao.getCategoryByName("Women's Clothing & Accessories");
+		             Category womensCategory = categoryDao.getCategoryByName("Men's Clothing & Accessories");
 		             Category category = categoryDao.getCategoryByNameAndId(newCategory,womensCategory.getId());
 					 if (category != null && category.getParentId() == womensCategory.getId()) {
 		                 productCategoryId = category.getId();
@@ -246,7 +247,7 @@ public class voonikSchedularTask1 {
 				     			}
 						 }
 					 
-					 String specifications = "Brand Name-:"+json.findValue("brand").findValue("name").asText()+",Gender-:Women"+",Material-:"+material;
+					 String specifications = "Brand Name-:"+json.findValue("brand").findValue("name").asText()+",Gender-:Men"+",Material-:"+material;
 					 testProduct.setCategoryId(productCategoryId);
 		             testProduct.setLastUpdate(new Date());
 		             testProduct.setParentPath(parentPath);
