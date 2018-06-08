@@ -7,14 +7,30 @@ package com.weavers.duqhan.util;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import com.weavers.duqhan.dao.CurrencyRatesDao;
+import com.weavers.duqhan.dao.ProductDao;
+import com.weavers.duqhan.dao.jpa.ProductDaoJpa;
+import com.weavers.duqhan.dto.CurrencyRates;
 
+import java.io.IOException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
 /**
  *
  * @author weaversAndroid
@@ -49,10 +65,32 @@ public class CurrencyConverter {
 		ratesByDate.put(date, rate);
 		return Double.parseDouble(rate);
     }
+    public static Double convertNew(String currencyFrom, String currencyTo) throws IOException {
+        HttpClient httpclient = new DefaultHttpClient();
+//        HttpGet httpGet = new HttpGet("https://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=json");
+        HttpGet httpGet = new HttpGet("https://cdn.shopify.com/s/javascripts/currencies.js");
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+        String responseBody = httpclient.execute(httpGet, responseHandler);
+        httpclient.getConnectionManager().shutdown();
+
+        String rates = responseBody.split("rates:")[1].split("convert")[0];
+        rates = rates.substring(0, rates.length() - 1);
+        ObjectMapper mapper = new ObjectMapper();
+        CurrencyRates jSONReader = null;
+        jSONReader = mapper.readValue(rates, CurrencyRates.class);
+//        System.out.println("ssssssssssss == " + jSONReader.getINR());
+        double ratio = 0.0;
+        if (currencyTo.equals("USD")) {
+            ratio = jSONReader.getINR() / jSONReader.getUSD();
+        } else {
+            ratio = jSONReader.getUSD() / jSONReader.getINR();
+        }
+        return ratio;
+    }
 
     public static Double usdTOinr(Double usdValue) {
         try {
-            Double inrValue = CurrencyConverter.convert("USD", "INR");//usd to inr
+            Double inrValue = CurrencyConverter.convertNew("USD", "INR");//usd to inr
             return Double.valueOf(String.valueOf(inrValue * usdValue));
         } catch (Exception e) {
             return null;
