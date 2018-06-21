@@ -21,14 +21,12 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.weavers.duqhan.dao.CurrencyRatesDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.jpa.ProductDaoJpa;
-import com.weavers.duqhan.dto.CurrencyRates;
 
 import java.io.IOException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.BasicResponseHandler;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 /**
@@ -65,7 +63,7 @@ public class CurrencyConverter {
 		ratesByDate.put(date, rate);
 		return Double.parseDouble(rate);
     }
-    public static Double convertNew(String currencyFrom, String currencyTo) throws IOException {
+   /* public static Double convertNew(String currencyFrom, String currencyTo) throws IOException {
         HttpClient httpclient = new DefaultHttpClient();
 //        HttpGet httpGet = new HttpGet("https://finance.yahoo.com/webservice/v1/symbols/allcurrencies/quote?format=json");
         HttpGet httpGet = new HttpGet("https://cdn.shopify.com/s/javascripts/currencies.js");
@@ -86,16 +84,16 @@ public class CurrencyConverter {
             ratio = jSONReader.getUSD() / jSONReader.getINR();
         }
         return ratio;
-    }
+    }*/
 
-    public static Double usdTOinr(Double usdValue) {
+    /*public static Double usdTOinr(Double usdValue) {
         try {
             Double inrValue = CurrencyConverter.convertNew("USD", "INR");//usd to inr
             return Double.valueOf(String.valueOf(inrValue * usdValue));
         } catch (Exception e) {
             return null;
         }
-    }
+    }*/
 
     public static Double inrTOusd(Double inrValue) {
         try {

@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.google.gson.Gson;
 import com.scrapping.engine.bean.ProductDetailsLinks;
 import com.weavers.duqhan.dao.CategoryDao;
+import com.weavers.duqhan.dao.CurrencyRatesDao;
 import com.weavers.duqhan.dao.ProductDao;
 import com.weavers.duqhan.dao.ProductImgDao;
 import com.weavers.duqhan.dao.ProductPropertiesDao;
@@ -57,7 +58,8 @@ public class ScheduledTasks2 {
     private ProductPropertyvaluesDao productPropertyvaluesDao;
     @Autowired
     private ProductPropertiesMapDao productPropertiesMapDao;
-    
+    @Autowired
+    private CurrencyRatesDao currencyRatesDao;
     @Scheduled(fixedRate=3*60*1000)
     public void loadTempProducts() {
     	 boolean isSuccess = true;
@@ -348,16 +350,16 @@ public class ScheduledTasks2 {
                                          SkuVal skuVal = thisAxpProductDto.getSkuVal();
                                          if (skuVal.getActSkuCalPrice() != null) {
                                              value = skuVal.getActSkuCalPrice().trim().replaceAll(",", "");
-                                             discountPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             discountPrice = this.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
                                              value = skuVal.getSkuCalPrice().trim().replaceAll(",", "");
-                                             actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             actualPrice = this.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
                                              markupPrice = discountPrice * 0.15 + 100;
                                              discountPrice = Math.ceil((discountPrice + markupPrice) / 10) * 10;
                                              actualPrice = Math.round(actualPrice + markupPrice);
                                          } else {
                                              discountPrice = 0.0;
                                              value = skuVal.getSkuCalPrice().trim().replaceAll(",", "");
-                                             actualPrice = CurrencyConverter.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
+                                             actualPrice = this.usdTOinr(Double.parseDouble(value.replaceAll(".*?([\\d.]+).*", "$1")));
                                              markupPrice = actualPrice * 0.15 + 100;
                                              discountPrice = Math.round(actualPrice + markupPrice);
                                              actualPrice = Math.round(actualPrice + markupPrice);
@@ -468,4 +470,13 @@ public class ScheduledTasks2 {
 		System.out.println("Done" + urlOfListPage);
 		
 	}
+	 public Double usdTOinr(Double usdValue) {
+	        try {
+	        	com.weavers.duqhan.domain.CurrencyRates currencyRates=currencyRatesDao.getCurrencyRates("USDTOINR");
+	        	Double inrValue = currencyRates.getRates();
+	            return Double.valueOf(String.valueOf(inrValue * usdValue));
+	        } catch (Exception e) {
+	            return null;
+	        }
+	    }
 }
